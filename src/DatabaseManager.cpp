@@ -126,7 +126,7 @@ Employee DatabaseManager::getEmployee(int emplyeeId) {
 }
 
 std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
-  std::vector<Employee> queryResultVec;
+  std::vector<Employee> employees;
   try {
     db << "SELECT * FROM Employees;" >>
         [&](int EmployeeId, std::string Name, std::string role, int reportsTo,
@@ -139,13 +139,13 @@ std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
           tempEmployee.HireDate = hireDate;
           tempEmployee.isActive = isActive;
           tempEmployee.personnelCode = personnelCode;
-          queryResultVec.push_back(tempEmployee);
+          employees.push_back(tempEmployee);
         };
   } catch (const std::exception &e) {
     std::cerr << e.what() << '\n';
   }
 
-  return queryResultVec;
+  return employees;
 }
 std::optional<performanceReview>
 DatabaseManager::getEmployeesReportingToHead(int reviewerId) {
