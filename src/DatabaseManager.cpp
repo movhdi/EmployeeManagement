@@ -145,7 +145,7 @@ std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
     return employees;
 }
 std::optional<performanceReview> DatabaseManager::getEmployeesReportingToHead(int reviewerId) {
-
+    db << "SELECT * FROM Employees where ReportsTo = ?;" << reviewerId >> ; 
     return std::optional<performanceReview>();
 }
 bool DatabaseManager::updateEmployee(const Employee& employee) {
