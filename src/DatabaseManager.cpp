@@ -70,15 +70,14 @@ bool DatabaseManager::addEmployee(const Employee& employee) {
 
     try {
         if (employeeIsManager) {
-            db << "insert into Employees (EmployeeID, Name, Role, HireDate, "
-                  "PersonnelCode, IsActive) values (?,?,?,?,?,?);"
+            db << "INSERT INTO Employees (EmployeeID, Name, Role, HireDate, "
+                  "PersonnelCode, IsActive) VALUES (?,?,?,?,?,?);"
                << employee.EmployeeId << employee.Name
                << roleToString(employee.role)
                // << static_cast<int>(employee.ReportsTo.value())
                << employee.HireDate << employee.personnelCode << static_cast<int>(employee.isActive);
         }
     } catch (const std::exception& e) {
-        std::cout << "Employee is Manager, and add employee failed" << std::endl;
         std::cerr << e.what() << '\n';
     }
     try {
@@ -125,29 +124,27 @@ Employee DatabaseManager::getEmployee(int emplyeeId) {
 
 std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
     std::vector<Employee> employees;
+    auto collector = getEmployeesCollector(employees);
     try {
-        db << "SELECT * FROM Employees;" >> [&](int EmployeeId, std::string Name, std::string role, int reportsTo,
-                                                std::string hireDate, int personnelCode, bool isActive) {
-            Employee tempEmployee;
-            tempEmployee.EmployeeId = EmployeeId;
-            tempEmployee.Name = Name;
-            tempEmployee.role = PerfMgmt::stringToRole(role).value();
-            tempEmployee.ReportsTo = reportsTo;
-            tempEmployee.HireDate = hireDate;
-            tempEmployee.isActive = isActive;
-            tempEmployee.personnelCode = personnelCode;
-            employees.push_back(tempEmployee);
-        };
+        db << "SELECT * FROM Employees;" >> collector;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
     }
 
     return employees;
 }
-std::optional<performanceReview> DatabaseManager::getEmployeesReportingToHead(int reviewerId) {
-    db << "SELECT * FROM Employees where ReportsTo = ?;" << reviewerId >> ; 
-    return std::optional<performanceReview>();
+
+std::optional<std::vector<Employee>> DatabaseManager::getEmployeesReportingToHead(const int reviewerId) {
+    std::vector<Employee> employees;
+    try {
+        auto collector = getEmployeesCollector(employees);
+        db << "SELECT * FROM Employees WHERE ReportsTo = ?;" << reviewerId >> collector;
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+    return employees;
 }
+
 bool DatabaseManager::updateEmployee(const Employee& employee) {
     return false;
 }
@@ -171,6 +168,22 @@ bool DatabaseManager::updateperformanceReview(int reviewId) {
 }
 bool DatabaseManager::deletePerformanceReview(int reviewId) {
     return false;
-};
+}
+
+std::function<void(int, std::string, std::string, int, std::string, int, bool)>
+DatabaseManager::getEmployeesCollector(std::vector<Employee>& employees) const {
+    return [&employees](int EmployeeId, std::string Name, std::string role, int reportsTo, std::string hireDate,
+                        int personnelCode, bool isActive) {
+        Employee tempEmployee;
+        tempEmployee.EmployeeId = EmployeeId;
+        tempEmployee.Name = Name;
+        tempEmployee.role = PerfMgmt::stringToRole(role).value();
+        tempEmployee.ReportsTo = reportsTo;
+        tempEmployee.HireDate = hireDate;
+        tempEmployee.isActive = isActive;
+        tempEmployee.personnelCode = personnelCode;
+        employees.push_back(tempEmployee);
+    };
+}
 
 } // namespace PerfMgmt

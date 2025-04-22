@@ -26,7 +26,7 @@ public:
     // 3. getAllEmployees
     std::optional<std::vector<Employee>> getAllEmployees();
     // 4. getDirectReports
-    std::optional<performanceReview> getEmployeesReportingToHead(int reviewerId);
+    std::optional<std::vector<Employee>> getEmployeesReportingToHead(int reviewerId);
 
     // 5. updateEmployee
     bool updateEmployee(const Employee& employee);
@@ -51,7 +51,9 @@ public:
 
 private:
     sqlite::database db;
-
+    // std::function<void(int, std::string, std::string, int, std::string, int, bool)> getEmployeeCallback;
+    std::function<void(int, std::string, std::string, int, std::string, int, bool)>
+    getEmployeesCollector(std::vector<Employee>& employees) const;
     // map database entry to Employee datastructure
 
     // map performance review to PerformanceReview data structure

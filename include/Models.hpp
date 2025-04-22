@@ -91,7 +91,7 @@ inline std::ostream& operator<<(std::ostream& os, const Employee& emp) {
        << "HireDate: " << emp.HireDate << std::endl
        << "Role: " << emp.role << std::endl
        << "isActive: " << (emp.isActive ? "true" : "false") << std::endl
-       << "ReportsTo: " << (emp.ReportsTo ? std::to_string(*emp.ReportsTo) : "null");
+       << "ReportsTo: " << (emp.ReportsTo ? std::to_string(*emp.ReportsTo) : "null") << std::endl;
     return os;
 }
 
