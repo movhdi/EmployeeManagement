@@ -57,9 +57,13 @@ bool DatabaseManager::InitializeDatabase() {
               "PerformanceReviews(ReviewerID);";
         db << "CREATE INDEX IF NOT EXISTS idx_review_date ON "
               "PerformanceReviews(ReviewDate);";
+    } catch (const sqlite::sqlite_exception& e) {
+        std::cerr << "Database initialization error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
+        throw; // Re-throw the exception to signal failure
     } catch (const std::exception& e) {
         std::cout << "Exception Occured in dataabse initialization" << std::endl;
         std::cerr << e.what() << '\n';
+        throw;
     }
     return 0;
 }
@@ -91,7 +95,6 @@ bool DatabaseManager::addEmployee(const Employee& employee) {
         }
 
     } catch (const std::exception& e) {
-        std::cout << "Employee is not Manager, and add employee failed" << std::endl;
         std::cerr << e.what() << '\n';
     }
     return true;
@@ -105,15 +108,7 @@ Employee DatabaseManager::getEmployee(int emplyeeId) {
         db << "SELECT EmployeeID, Name, ReportsTo, Role, HireDate, PersonnelCode, "
               "IsActive FROM Employees WHERE employeeId = ?;"
            << emplyeeId >>
-            [&](int EmployeeId, std::string Name, int ReportsTo, std::string Role, std::string HireDate,
-                int personnelCode, bool IsActive) {
-                employeeTemp.EmployeeId = EmployeeId;
-                employeeTemp.Name = Name;
-                employeeTemp.ReportsTo = ReportsTo;
-                employeeTemp.HireDate = HireDate;
-                employeeTemp.role = stringToRole(Role).value();
-                employeeTemp.personnelCode = personnelCode;
-            };
+            getSingleEmployeeCollector(employeeTemp);
     } catch (const std::exception& e) {
         std::cout << "Error in geting employee occured" << std::endl;
         std::cerr << e.what() << '\n';
@@ -124,7 +119,7 @@ Employee DatabaseManager::getEmployee(int emplyeeId) {
 
 std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
     std::vector<Employee> employees;
-    auto collector = getEmployeesCollector(employees);
+    auto collector = getMultipleEmployeeCollector(employees);
     try {
         db << "SELECT * FROM Employees;" >> collector;
     } catch (const std::exception& e) {
@@ -137,7 +132,7 @@ std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
 std::optional<std::vector<Employee>> DatabaseManager::getEmployeesReportingToHead(const int reviewerId) {
     std::vector<Employee> employees;
     try {
-        auto collector = getEmployeesCollector(employees);
+        auto collector = getMultipleEmployeeCollector(employees);
         db << "SELECT * FROM Employees WHERE ReportsTo = ?;" << reviewerId >> collector;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
@@ -163,7 +158,7 @@ std::optional<performanceReview> DatabaseManager::getPerformanceForEmployee(int 
 std::optional<std::vector<performanceReview>> DatabaseManager::getReviewByReviewe(int reviewerId) {
     return std::optional<std::vector<performanceReview>>();
 }
-bool DatabaseManager::updateperformanceReview(int reviewId) {
+bool DatabaseManager::updatePerformanceReview(int reviewId) {
     return false;
 }
 bool DatabaseManager::deletePerformanceReview(int reviewId) {
@@ -171,7 +166,7 @@ bool DatabaseManager::deletePerformanceReview(int reviewId) {
 }
 
 std::function<void(int, std::string, std::string, int, std::string, int, bool)>
-DatabaseManager::getEmployeesCollector(std::vector<Employee>& employees) const {
+DatabaseManager::getMultipleEmployeeCollector(std::vector<Employee>& employees) const {
     return [&employees](int EmployeeId, std::string Name, std::string role, int reportsTo, std::string hireDate,
                         int personnelCode, bool isActive) {
         Employee tempEmployee;
@@ -183,6 +178,19 @@ DatabaseManager::getEmployeesCollector(std::vector<Employee>& employees) const {
         tempEmployee.isActive = isActive;
         tempEmployee.personnelCode = personnelCode;
         employees.push_back(tempEmployee);
+    };
+}
+
+std::function<void(int, std::string, int, std::string, std::string, int, bool)>
+DatabaseManager::getSingleEmployeeCollector(Employee& employee) const {
+    return [&](int EmployeeId, std::string Name, int ReportsTo, std::string Role, std::string HireDate,
+               int personnelCode, bool IsActive) {
+        employee.EmployeeId = EmployeeId;
+        employee.Name = Name;
+        employee.ReportsTo = ReportsTo;
+        employee.HireDate = HireDate;
+        employee.role = stringToRole(Role).value();
+        employee.personnelCode = personnelCode;
     };
 }
 

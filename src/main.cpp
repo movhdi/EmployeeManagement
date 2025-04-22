@@ -29,6 +29,6 @@ int main() {
             std::cout << employee;
         }
     }
-
+    std::cout << db.getEmployee(1);
     return 0;
 }

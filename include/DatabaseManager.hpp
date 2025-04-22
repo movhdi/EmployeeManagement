@@ -45,7 +45,7 @@ public:
     // 4. getReviewByReviewer
     std::optional<std::vector<performanceReview>> getReviewByReviewe(int reviewerId);
     // 5. updatePerformanceReview
-    bool updateperformanceReview(int reviewId);
+    bool updatePerformanceReview(int reviewId);
     // 6. deletePerformanceReivew
     bool deletePerformanceReview(int reviewId);
 
@@ -53,7 +53,9 @@ private:
     sqlite::database db;
     // std::function<void(int, std::string, std::string, int, std::string, int, bool)> getEmployeeCallback;
     std::function<void(int, std::string, std::string, int, std::string, int, bool)>
-    getEmployeesCollector(std::vector<Employee>& employees) const;
+    getMultipleEmployeeCollector(std::vector<Employee>& employees) const;
+    std::function<void(int, std::string, int, std::string, std::string, int, bool)>
+    getSingleEmployeeCollector(Employee& employee) const;
     // map database entry to Employee datastructure
 
     // map performance review to PerformanceReview data structure
