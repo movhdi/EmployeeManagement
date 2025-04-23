@@ -23,13 +23,14 @@ int main() {
             std::cout << employee;
         }
     }
-    db.updateEmployee(employee5);
+    // db.updateEmployee(employee5);
     auto employees = db.getEmployeesReportingToHead(0);
     if (employees) {
         for (const auto& employee : employees.value()) {
             std::cout << employee;
         }
     }
+    db.deactivateEmployee(4);
     std::cout << db.getEmployee(4);
 
     return 0;

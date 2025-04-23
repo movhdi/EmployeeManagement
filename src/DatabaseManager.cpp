@@ -99,20 +99,19 @@ bool DatabaseManager::addEmployee(const Employee& employee) {
 }
 
 Employee DatabaseManager::getEmployee(int emplyeeId) {
-    // result
-    Employee employeeTemp;
+    Employee EmployeeResult;
 
     try {
         db << "SELECT EmployeeID, Name, ReportsTo, Role, HireDate, PersonnelCode, "
               "IsActive FROM Employees WHERE employeeId = ?;"
            << emplyeeId >>
-            getSingleEmployeeCollector(employeeTemp);
+            getSingleEmployeeCollector(EmployeeResult);
     } catch (const std::exception& e) {
         std::cout << "Error in geting employee occured" << std::endl;
         std::cerr << e.what() << '\n';
     }
 
-    return employeeTemp;
+    return EmployeeResult;
 }
 
 std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
@@ -160,23 +159,40 @@ bool DatabaseManager::updateEmployee(const Employee& employee) {
 }
 
 bool DatabaseManager::deactivateEmployee(int employeeId) {
-    return false;
+    if (employeeId <= 0) {
+        std::cerr << "Invalid employee ID!" << std::endl;
+        return false;
+    }
+    try {
+        auto stmt = db << "UPDATE Employees SET IsActive = ? WHERE EmployeeID = ?;";
+        stmt << 0 << employeeId;
+        stmt.execute();
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+    return true;
 }
+
 bool DatabaseManager::updatePerformanceReviwe(const performanceReview& review) {
     return false;
 }
+
 std::optional<performanceReview> DatabaseManager::getPerformanceReview(int reviewId) {
     return std::optional<performanceReview>();
 }
+
 std::optional<performanceReview> DatabaseManager::getPerformanceForEmployee(int employeeId) {
     return std::optional<performanceReview>();
 }
+
 std::optional<std::vector<performanceReview>> DatabaseManager::getReviewByReviewe(int reviewerId) {
     return std::optional<std::vector<performanceReview>>();
 }
+
 bool DatabaseManager::updatePerformanceReview(int reviewId) {
     return false;
 }
+
 bool DatabaseManager::deletePerformanceReview(int reviewId) {
     return false;
 }
@@ -207,6 +223,7 @@ DatabaseManager::getSingleEmployeeCollector(Employee& employee) const {
         employee.HireDate = HireDate;
         employee.role = stringToRole(Role).value();
         employee.personnelCode = personnelCode;
+        employee.isActive = IsActive;
     };
 }
 
