@@ -69,31 +69,29 @@ bool DatabaseManager::InitializeDatabase() {
 }
 
 bool DatabaseManager::addEmployee(const Employee& employee) {
-
-    bool employeeIsManager = !employee.ReportsTo.has_value();
-
-    try {
-        if (employeeIsManager) {
-            db << "INSERT INTO Employees (EmployeeID, Name, Role, HireDate, "
-                  "PersonnelCode, IsActive) VALUES (?,?,?,?,?,?);"
-               << employee.EmployeeId << employee.Name
-               << roleToString(employee.role)
-               // << static_cast<int>(employee.ReportsTo.value())
-               << employee.HireDate << employee.personnelCode << static_cast<int>(employee.isActive);
-        }
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+    if (employee.EmployeeId <= 0) {
+        std::cerr << "Invalid employee Id " << std::endl;
+        return false;
     }
     try {
-        if (!employeeIsManager) {
-            db << "insert into Employees (EmployeeID, Name, Role, ReportsTo, "
-                  "HireDate, "
-                  "PersonnelCode, IsActive) values (?,?,?,?,?,?,?);"
-               << employee.EmployeeId << employee.Name << roleToString(employee.role)
-               << static_cast<int>(employee.ReportsTo.value()) << employee.HireDate << employee.personnelCode
-               << static_cast<int>(employee.isActive);
-        }
+        // The following lines is commented out because it runs but raises warning in compile time
+        // db << "INSERT INTO Employees (EmployeeID, Name, Role, ReportsTo ,HireDate, "
+        //       "PersonnelCode, IsActive) VALUES (?,?,?,?,?,?,?);"
+        //    << employee.EmployeeId << employee.Name << roleToString(employee.role)
+        //    << (employee.ReportsTo.has_value() ? employee.ReportsTo.value() : NULL) << employee.HireDate
+        //    << employee.personnelCode << static_cast<int>(employee.isActive);
+        auto stmt =
+            db << "INSERT INTO Employees (EmployeeID, Name, Role, ReportsTo, HireDate, PersonnelCode, IsActive) "
+                  "VALUES (?, ?, ?, ?, ?, ?, ?);";
+        stmt << employee.EmployeeId << employee.Name << roleToString(employee.role);
 
+        if (employee.ReportsTo) {
+            stmt << *employee.ReportsTo;
+        } else {
+            stmt << nullptr;
+        }
+        stmt << employee.HireDate << employee.personnelCode << static_cast<int>(employee.isActive);
+        stmt.execute();
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
     }
@@ -141,8 +139,26 @@ std::optional<std::vector<Employee>> DatabaseManager::getEmployeesReportingToHea
 }
 
 bool DatabaseManager::updateEmployee(const Employee& employee) {
-    return false;
+    if (employee.EmployeeId <= 0) {
+        std::cerr << "Invalid employee Id " << std::endl;
+        return false;
+    }
+    try {
+        db << "UPDATE Employees SET Name = ?, Role = ?, ReportsTo = ?, HireDate = ?, PersonnelCode = ?, IsActive = ? "
+              "WHERE "
+              "EmployeeID = ?;"
+           << employee.Name << roleToString(employee.role) << employee.ReportsTo << employee.HireDate
+           << employee.personnelCode << employee.isActive << employee.EmployeeId;
+        std::cout << "employee updated" << std::endl;
+    } catch (const sqlite::sqlite_exception& e) {
+        std::cerr << "employee update error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
+        throw; // Re-throw the exception to signal failure
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+    return true;
 }
+
 bool DatabaseManager::deactivateEmployee(int employeeId) {
     return false;
 }
