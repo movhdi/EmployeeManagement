@@ -59,6 +59,9 @@
         "typeinfo": "cpp",
         "codecvt": "cpp",
         "iomanip": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "mutex": "cpp"
     }
 }

@@ -84,12 +84,12 @@ bool DatabaseManager::addEmployee(const Employee& employee) {
             db << "INSERT INTO Employees (EmployeeID, Name, Role, ReportsTo, HireDate, PersonnelCode, IsActive) "
                   "VALUES (?, ?, ?, ?, ?, ?, ?);";
         stmt << employee.EmployeeId << employee.Name << roleToString(employee.role);
-
-        if (employee.ReportsTo) {
-            stmt << *employee.ReportsTo;
-        } else {
-            stmt << nullptr;
-        }
+        stmt << employee.ReportsTo.value_or(NULL);
+        // if (employee.ReportsTo) {
+        //     stmt << *employee.ReportsTo;
+        // } else {
+        //     stmt << nullptr;
+        // }
         stmt << employee.HireDate << employee.personnelCode << static_cast<int>(employee.isActive);
         stmt.execute();
     } catch (const std::exception& e) {
@@ -107,7 +107,7 @@ Employee DatabaseManager::getEmployee(int emplyeeId) {
            << emplyeeId >>
             getSingleEmployeeCollector(EmployeeResult);
     } catch (const std::exception& e) {
-        std::cout << "Error in geting employee occured" << std::endl;
+        std::cout << "Error in geting employee" << std::endl;
         std::cerr << e.what() << '\n';
     }
 
@@ -148,7 +148,6 @@ bool DatabaseManager::updateEmployee(const Employee& employee) {
               "EmployeeID = ?;"
            << employee.Name << roleToString(employee.role) << employee.ReportsTo << employee.HireDate
            << employee.personnelCode << employee.isActive << employee.EmployeeId;
-        std::cout << "employee updated" << std::endl;
     } catch (const sqlite::sqlite_exception& e) {
         std::cerr << "employee update error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
         throw; // Re-throw the exception to signal failure
@@ -173,16 +172,48 @@ bool DatabaseManager::deactivateEmployee(int employeeId) {
     return true;
 }
 
-bool DatabaseManager::updatePerformanceReviwe(const performanceReview& review) {
+bool DatabaseManager::addPerformanceReview(const performanceReview& review) {
+    try {
+        auto stmt = db << "INSERT INTO PerformanceReviews (ReviewID, EmployeeID, ReviewerID, OverallRating, Comments,"
+                          "PunctualityRating, QualityOfWorkRating, TeamworkRating, "
+                          "CommunicationRating, ProblemSolvingRating, CreativityRating, TechnicalSkillsRating, "
+                          "AdaptabilityRating, LeadershipRating, InitiativeRating) VALUES (?, ?, ?, ?, ?, ?, "
+                          "?, ?, ?, ? ,? ,?, ?, ?, ?);";
+        stmt << review.ReviewId << review.EmployeeId << review.ReviewerId << review.OverallRating.value()
+             << review.Comments.value() << review.PunctualityRating << review.QualityOfWorkRating
+             << review.TeamworkRating << review.CommunicationRating << review.ProblemSolvingRating
+             << review.CreativityRating << review.TechnicalSkillsRating << review.AdaptabilityRating
+             << review.LeadershipRating << review.InitiativeRating;
+        stmt.execute();
+    } catch (const sqlite::sqlite_exception& e) {
+        std::cerr << "Review insertion failure : " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
     return false;
 }
 
 std::optional<performanceReview> DatabaseManager::getPerformanceReview(int reviewId) {
-    return std::optional<performanceReview>();
+    performanceReview review;
+    try {
+        auto collector = getPerformanceReviewCollector(review);
+        db << "SELECT * FROM PerformanceReviews WHERE ReviewID = (?);" << reviewId >> collector;
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+    return review;
 }
 
-std::optional<performanceReview> DatabaseManager::getPerformanceForEmployee(int employeeId) {
-    return std::optional<performanceReview>();
+std::optional<performanceReview> DatabaseManager::getPerformanceForEmployee(const int& employeeId) {
+    performanceReview review;
+    try {
+        auto collector = getPerformanceReviewCollector(review);
+        db << "SELECT * FROM PerformanceReviews WHERE EmployeeID = (?);" << employeeId >> collector;
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+
+    return review;
 }
 
 std::optional<std::vector<performanceReview>> DatabaseManager::getReviewByReviewe(int reviewerId) {
@@ -224,6 +255,32 @@ DatabaseManager::getSingleEmployeeCollector(Employee& employee) const {
         employee.role = stringToRole(Role).value();
         employee.personnelCode = personnelCode;
         employee.isActive = IsActive;
+    };
+}
+
+std::function<void(int, int, int, std::string, float, std::string, float, float, float, float, float, float, float,
+                   float, float, float)>
+DatabaseManager::getPerformanceReviewCollector(performanceReview& review) const {
+    return [&](int ReviewID, int EmployeeID, int ReviewerID, std::string ReviewDate, float OverallRating,
+               std::string Comments, float PunctualityRating, float QualityOfWorkRating, float TeamworkRating,
+               float CommunicationRating, float ProblemSolvingRating, float CreativityRating,
+               float TechnicalSkillRating, float AdaptibilityRating, float LeadershipRating, float InitiativeRating) {
+        review.ReviewId = ReviewID;
+        review.EmployeeId = EmployeeID;
+        review.ReviewerId = ReviewerID;
+        review.reviewDate = ReviewDate;
+        review.OverallRating = OverallRating;
+        review.PunctualityRating = PunctualityRating;
+        review.QualityOfWorkRating = QualityOfWorkRating;
+        review.TeamworkRating = TeamworkRating;
+        review.CommunicationRating = CommunicationRating;
+        review.ProblemSolvingRating = ProblemSolvingRating;
+        review.CreativityRating = CreativityRating;
+        review.TechnicalSkillsRating = TechnicalSkillRating;
+        review.AdaptabilityRating = AdaptibilityRating;
+        review.LeadershipRating = LeadershipRating;
+        review.InitiativeRating = InitiativeRating;
+        review.Comments = Comments;
     };
 }
 

@@ -90,7 +90,7 @@ inline std::ostream& operator<<(std::ostream& os, const Employee& emp) {
        << "Name: " << emp.Name << std::endl
        << "HireDate: " << emp.HireDate << std::endl
        << "Role: " << emp.role << std::endl
-       << "isActive: " << emp.isActive << std::endl //(emp.isActive ? "true" : "false") << std::endl
+       << "isActive: " << std::boolalpha << emp.isActive << std::endl
        << "ReportsTo: " << (emp.ReportsTo ? std::to_string(*emp.ReportsTo) : "null") << std::endl;
     return os;
 }
@@ -100,25 +100,29 @@ struct performanceReview {
     int EmployeeId{0};
     int ReviewerId{0};
     std::string reviewDate;
-    std::optional<float> OverallRating{std::nullopt};
+    std::optional<float> OverallRating;
 
     float PunctualityRating{0.0};
     float QualityOfWorkRating{0.0};
     float CommunicationRating{0.0};
     float TeamworkRating{0.0};
+    float TechnicalSkillsRating{0.0};
     float ProblemSolvingRating{0.0};
     float CreativityRating{0.0};
     float AdaptabilityRating{0.0};
     float LeadershipRating{0.0};
     float InitiativeRating{0.0};
-    std::string Comments;
+    std::optional<std::string> Comments;
 
+    // default constructor
+    performanceReview() {
+    }
     // constructor
-    performanceReview(int ReviewId, int EmployeeId, int ReiviewerId, const std::string& reviewDate,
+    performanceReview(int ReviewId, int EmployeeId, int ReviewerId, const std::string& reviewDate,
                       std::optional<float> OveralRating, float PunctualityRating, float QualityOfWorkRating,
-                      float CommunicatioRating, float TeamworkRating, float ProblemSolvingRating,
-                      float CreativityRating, float AdaptabilityRating, float LeadershipRating, float InitiativeRating,
-                      const std::string& Comments) :
+                      float CommunicationRating, float TeamworkRating, float TechnicalSkillsRating,
+                      float ProblemSolvingRating, float CreativityRating, float AdaptabilityRating,
+                      float LeadershipRating, float InitiativeRating, const std::string& Comments) :
         ReviewId{ReviewId},
         EmployeeId{EmployeeId},
         ReviewerId{ReviewerId},
@@ -128,6 +132,7 @@ struct performanceReview {
         QualityOfWorkRating{QualityOfWorkRating},
         CommunicationRating{CommunicationRating},
         TeamworkRating{TeamworkRating},
+        TechnicalSkillsRating{TechnicalSkillsRating},
         ProblemSolvingRating{ProblemSolvingRating},
         CreativityRating{CreativityRating},
         AdaptabilityRating{AdaptabilityRating},
@@ -135,7 +140,32 @@ struct performanceReview {
         InitiativeRating{InitiativeRating},
         Comments{Comments} {
     }
+
+    // destructor
+    ~performanceReview() {
+    }
 };
+
+inline std::ostream& operator<<(std::ostream& os, const performanceReview& review) {
+    os << "Review ID : " << review.ReviewId << std::endl << "Date of Review : " << review.reviewDate << std::endl;
+    if (review.OverallRating) {
+        os << "Overall Rating : " << review.OverallRating.value() << std::endl;
+    }
+    os << "Punctuality Rating : " << review.PunctualityRating << std::endl
+       << "Quality of Work : " << review.QualityOfWorkRating << std::endl
+       << "Communication Rating : " << review.CommunicationRating << std::endl
+       << "Teamwork Rating : " << review.TeamworkRating << std::endl
+       << "Technical Skill Rating : " << review.TechnicalSkillsRating << std::endl
+       << "Problem Solving : " << review.ProblemSolvingRating << std::endl
+       << "Creativity Rating : " << review.CreativityRating << std::endl
+       << "Adaptibility Rating : " << review.AdaptabilityRating << std::endl
+       << "Leadership Rating : " << review.LeadershipRating << std::endl
+       << "Initiative Rating : " << review.InitiativeRating << std::endl;
+    if (review.Comments) {
+        os << "Comments : " << std::endl << review.Comments.value_or("") << std::endl;
+    }
+    return os;
+}
 
 } // namespace PerfMgmt
 #endif // MODELS_HPP

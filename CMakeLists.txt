@@ -42,6 +42,7 @@ set(EXECUTABLE_NAME EmployeePerformanceManager)
 add_executable(${EXECUTABLE_NAME} 
     src/main.cpp
     src/DatabaseManager.cpp
+    src/test.cpp
 )
 
 # --- Include Directories ---

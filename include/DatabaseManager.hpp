@@ -37,11 +37,11 @@ public:
     // ---- Performance Review Management ----
 
     // 1. addPerformanceReivew
-    bool updatePerformanceReviwe(const performanceReview& review);
+    bool addPerformanceReview(const performanceReview& review);
     // 2. getPerformanceReview by id
     std::optional<performanceReview> getPerformanceReview(int reviewId);
     // 3. getReviewForEmployee
-    std::optional<performanceReview> getPerformanceForEmployee(int employeeId);
+    std::optional<performanceReview> getPerformanceForEmployee(const int& employeeId);
     // 4. getReviewByReviewer
     std::optional<std::vector<performanceReview>> getReviewByReviewe(int reviewerId);
     // 5. updatePerformanceReview
@@ -51,11 +51,18 @@ public:
 
 private:
     sqlite::database db;
-    // std::function<void(int, std::string, std::string, int, std::string, int, bool)> getEmployeeCallback;
+    // lambda getter which is fed into db << operator and populates employee(s)
     std::function<void(int, std::string, std::string, int, std::string, int, bool)>
     getMultipleEmployeeCollector(std::vector<Employee>& employees) const;
+
+    // lambda getter which is fed into db << operator and populates employee
     std::function<void(int, std::string, int, std::string, std::string, int, bool)>
     getSingleEmployeeCollector(Employee& employee) const;
+
+    // lambda getter which is fed into db << operator and populates performanceReview
+    std::function<void(int, int, int, std::string, float, std::string, float, float, float, float, float, float, float,
+                       float, float, float)>
+    getPerformanceReviewCollector(performanceReview& review) const;
     // map database entry to Employee datastructure
 
     // map performance review to PerformanceReview data structure
