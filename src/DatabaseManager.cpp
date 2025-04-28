@@ -59,7 +59,6 @@ bool DatabaseManager::InitializeDatabase() {
               "PerformanceReviews(ReviewDate);";
     } catch (const sqlite::sqlite_exception& e) {
         std::cerr << "Database initialization error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
-        throw; // Re-throw the exception to signal failure
     } catch (const std::exception& e) {
         std::cout << "Exception Occured in dataabse initialization" << std::endl;
         std::cerr << e.what() << '\n';
@@ -128,8 +127,8 @@ std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
 
 std::optional<std::vector<Employee>> DatabaseManager::getEmployeesReportingToHead(const int reviewerId) {
     std::vector<Employee> employees;
+    auto collector = getMultipleEmployeeCollector(employees);
     try {
-        auto collector = getMultipleEmployeeCollector(employees);
         db << "SELECT * FROM Employees WHERE ReportsTo = ?;" << reviewerId >> collector;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
@@ -150,7 +149,6 @@ bool DatabaseManager::updateEmployee(const Employee& employee) {
            << employee.personnelCode << employee.isActive << employee.EmployeeId;
     } catch (const sqlite::sqlite_exception& e) {
         std::cerr << "employee update error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
-        throw; // Re-throw the exception to signal failure
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
     }
@@ -195,8 +193,8 @@ bool DatabaseManager::addPerformanceReview(const performanceReview& review) {
 
 std::optional<performanceReview> DatabaseManager::getPerformanceReview(int reviewId) {
     performanceReview review;
+    auto collector = getPerformanceReviewCollector(review);
     try {
-        auto collector = getPerformanceReviewCollector(review);
         db << "SELECT * FROM PerformanceReviews WHERE ReviewID = (?);" << reviewId >> collector;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
@@ -206,8 +204,8 @@ std::optional<performanceReview> DatabaseManager::getPerformanceReview(int revie
 
 std::optional<performanceReview> DatabaseManager::getPerformanceForEmployee(const int& employeeId) {
     performanceReview review;
+    auto collector = getPerformanceReviewCollector(review);
     try {
-        auto collector = getPerformanceReviewCollector(review);
         db << "SELECT * FROM PerformanceReviews WHERE EmployeeID = (?);" << employeeId >> collector;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
