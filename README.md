@@ -38,7 +38,7 @@ cmake -build .
 
 - Run it from the build directory:
 <pre>
-./performance_manager
+./EmployeePerformanceManager 
 </pre>
 
 
