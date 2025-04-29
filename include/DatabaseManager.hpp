@@ -39,11 +39,11 @@ public:
     // 1. addPerformanceReivew
     bool addPerformanceReview(const PerformanceReview& review);
     // 2. getPerformanceReview by id
-    std::optional<PerformanceReview> getPerformanceReview(int reviewId);
+    std::optional<PerformanceReview> getPerformanceReview(const int& reviewId);
     // 3. getReviewForEmployee
     std::optional<PerformanceReview> getPerformanceForEmployee(const int& employeeId);
     // 4. getReviewByReviewer
-    std::optional<std::vector<PerformanceReview>> getReviewByReviewe(int reviewerId);
+    std::optional<std::vector<PerformanceReview>> getReviewByReviewer(int reviewerId);
     // 5. updatePerformanceReview
     bool updatePerformanceReview(int reviewId);
     // 6. deletePerformanceReivew

@@ -71,22 +71,11 @@ bool DatabaseManager::addEmployee(const Employee& employee) {
         return false;
     }
     try {
-        // The following lines is commented out because it runs but raises warning in compile time
-        // db << "INSERT INTO Employees (EmployeeID, Name, Role, ReportsTo ,HireDate, "
-        //       "PersonnelCode, IsActive) VALUES (?,?,?,?,?,?,?);"
-        //    << employee.EmployeeId << employee.Name << roleToString(employee.role)
-        //    << (employee.ReportsTo.has_value() ? employee.ReportsTo.value() : NULL) << employee.HireDate
-        //    << employee.personnelCode << static_cast<int>(employee.isActive);
         auto stmt =
             db << "INSERT INTO employees (employee_id, name, role, reports_to, hire_date, personnel_code, is_active) "
                   "VALUES (?, ?, ?, ?, ?, ?, ?);";
         stmt << employee.employeeId << employee.name << roleToString(employee.role);
         stmt << employee.reportsTo.value_or(SQLITE_NULL);
-        // if (employee.ReportsTo) {
-        //     stmt << *employee.ReportsTo;
-        // } else {
-        //     stmt << nullptr;
-        // }
         stmt << employee.hireDate << employee.personnelCode << static_cast<int>(employee.isActive);
         stmt.execute();
         return true;
@@ -103,17 +92,21 @@ std::optional<Employee> DatabaseManager::getEmployee(int emplyeeId) {
     }
 
     Employee employeeResult;
-    bool isFound;
+    bool isFound{false};
 
     try {
         db << "SELECT employee_id, name, reports_to, role, hire_date, personnel_code, "
               "is_active FROM employees WHERE employee_id = ?;"
            << emplyeeId >>
             getSingleEmployeeCollector(employeeResult, isFound);
-        return employeeResult;
+        if (isFound) {
+            return employeeResult;
+        } else {
+            return std::nullopt;
+        }
+
     } catch (const std::exception& e) {
-        std::cout << "Error in geting employee" << std::endl;
-        std::cerr << e.what() << '\n';
+        std::cerr << "Error in geting employee" << e.what() << '\n';
         return std::nullopt;
     }
 }
@@ -133,6 +126,11 @@ std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
 }
 
 std::optional<std::vector<Employee>> DatabaseManager::getEmployeesReportingToHead(const int reviewerId) {
+    if (reviewerId <= 0) {
+        std::cerr << "Invalid reviewer id" << std::endl;
+        return std::nullopt;
+    }
+
     std::vector<Employee> employees;
     bool isFound{false};
 
@@ -181,7 +179,7 @@ bool DatabaseManager::deactivateEmployee(int employeeId) {
         stmt.execute();
         return true;
     } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[deactivateEmployee] : " << e.what() << '\n';
     }
     return false;
 }
@@ -200,15 +198,20 @@ bool DatabaseManager::addPerformanceReview(const PerformanceReview& review) {
              << review.creativityRating << review.technicalSkillsRating << review.adaptabilityRating
              << review.leadershipRating << review.initiativeRating;
         stmt.execute();
+        return true;
     } catch (const sqlite::sqlite_exception& e) {
         std::cerr << "[addPerformanceReview] :" << "Review insertion failure : " << e.what()
                   << " (code: " << e.get_code() << ")" << std::endl;
         return false;
     }
-    return true;
 }
 
-std::optional<PerformanceReview> DatabaseManager::getPerformanceReview(int reviewId) {
+std::optional<PerformanceReview> DatabaseManager::getPerformanceReview(const int& reviewId) {
+    if (reviewId <= 0) {
+        std::cerr << "Invalid review id" << std::endl;
+        return std::nullopt;
+    }
+
     PerformanceReview review;
     bool isFound{false};
 
@@ -245,7 +248,7 @@ std::optional<PerformanceReview> DatabaseManager::getPerformanceForEmployee(cons
     }
 }
 
-std::optional<std::vector<PerformanceReview>> DatabaseManager::getReviewByReviewe(int reviewerId) {
+std::optional<std::vector<PerformanceReview>> DatabaseManager::getReviewByReviewer(int reviewerId) {
     return std::optional<std::vector<PerformanceReview>>();
 }
 
