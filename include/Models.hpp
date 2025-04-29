@@ -8,25 +8,25 @@
 namespace PerfMgmt {
 
 enum class Role {
-    Manager,
-    Boss,
-    Specialist,
-    technician
+    MANAGER,
+    BOSS,
+    SPECIALIST,
+    TECHNICIAN
 };
 
 inline std::string roleToString(Role role) {
     switch (role) {
-    case Role::Manager:
+    case Role::MANAGER:
         return "Manager";
         break;
-    case Role::Boss:
+    case Role::BOSS:
         return "Boss";
         break;
-    case Role::Specialist:
+    case Role::SPECIALIST:
         return "Specialist";
         break;
-    case Role::technician:
-        return "technician";
+    case Role::TECHNICIAN:
+        return "Technician";
         break;
     default:
         return "unknown";
@@ -43,38 +43,38 @@ inline std::ostream& operator<<(std::ostream& os, Role role) {
 // Helper function to convert string to Role enum
 inline std::optional<Role> stringToRole(const std::string& roleStr) {
     if (roleStr == "Manager") {
-        return Role::Manager;
+        return Role::MANAGER;
     } else if (roleStr == "Boss") {
-        return Role::Boss;
+        return Role::BOSS;
     } else if (roleStr == "Specialist") {
-        return Role::Specialist;
-    } else if (roleStr == "technician") {
-        return Role::technician;
+        return Role::SPECIALIST;
+    } else if (roleStr == "Technician") {
+        return Role::TECHNICIAN;
     } else {
         return std::nullopt;
     }
 }
 
 struct Employee {
-    int EmployeeId{0};
+    int employeeId{0};
     int personnelCode{};
-    std::string Name{};
-    std::string HireDate{};
-    Role role = Role::Specialist; // Default specialist
+    std::string name{};
+    std::string hireDate{};
+    Role role = Role::SPECIALIST; // Default specialist
     bool isActive{true};
-    std::optional<int> ReportsTo{std::nullopt};
+    std::optional<int> reportsTo{std::nullopt};
 
 public:
     // Constructor
     Employee(int id, int personnelCode, const std::string& name, const std::string& hireDate, Role role, bool isActive,
              std::optional<int> rt) :
-        EmployeeId{id},
+        employeeId{id},
         personnelCode{personnelCode},
-        Name{name},
-        HireDate{hireDate},
+        name{name},
+        hireDate{hireDate},
         role{role},
         isActive{isActive},
-        ReportsTo{rt} {
+        reportsTo{rt} {
     }
     // Default Constructor
     Employee() {
@@ -85,84 +85,84 @@ public:
 
 inline std::ostream& operator<<(std::ostream& os, const Employee& emp) {
     os << "------------------" << std::endl;
-    os << "EmployeeId: " << emp.EmployeeId << std::endl
+    os << "Employee ID: " << emp.employeeId << std::endl
        << "Personnel Code: " << emp.personnelCode << std::endl
-       << "Name: " << emp.Name << std::endl
-       << "HireDate: " << emp.HireDate << std::endl
+       << "Name: " << emp.name << std::endl
+       << "Hire Date: " << emp.hireDate << std::endl
        << "Role: " << emp.role << std::endl
-       << "isActive: " << std::boolalpha << emp.isActive << std::endl
-       << "ReportsTo: " << (emp.ReportsTo ? std::to_string(*emp.ReportsTo) : "null") << std::endl;
+       << "Employee Status: " << (static_cast<bool>(emp.isActive) ? "Active" : "Not-Active") << std::endl
+       << "ReportsTo: " << (emp.reportsTo ? std::to_string(*emp.reportsTo) : "null") << std::endl;
     return os;
 }
 
-struct performanceReview {
-    int ReviewId{0};
-    int EmployeeId{0};
-    int ReviewerId{0};
+struct PerformanceReview {
+    int reviewId{0};
+    int employeeId{0};
+    int reviewerId{0};
     std::string reviewDate;
-    std::optional<float> OverallRating;
+    std::optional<float> overallRating;
 
-    float PunctualityRating{0.0};
-    float QualityOfWorkRating{0.0};
-    float CommunicationRating{0.0};
-    float TeamworkRating{0.0};
-    float TechnicalSkillsRating{0.0};
-    float ProblemSolvingRating{0.0};
-    float CreativityRating{0.0};
-    float AdaptabilityRating{0.0};
-    float LeadershipRating{0.0};
-    float InitiativeRating{0.0};
-    std::optional<std::string> Comments;
+    float punctualityRating{0.0};
+    float qualityOfWorkRating{0.0};
+    float communicationRating{0.0};
+    float teamworkRating{0.0};
+    float technicalSkillsRating{0.0};
+    float problemSolvingRating{0.0};
+    float creativityRating{0.0};
+    float adaptabilityRating{0.0};
+    float leadershipRating{0.0};
+    float initiativeRating{0.0};
+    std::optional<std::string> comments;
 
     // default constructor
-    performanceReview() {
+    PerformanceReview() {
     }
     // constructor
-    performanceReview(int ReviewId, int EmployeeId, int ReviewerId, const std::string& reviewDate,
+    PerformanceReview(int ReviewId, int EmployeeId, int ReviewerId, const std::string& reviewDate,
                       std::optional<float> OveralRating, float PunctualityRating, float QualityOfWorkRating,
                       float CommunicationRating, float TeamworkRating, float TechnicalSkillsRating,
                       float ProblemSolvingRating, float CreativityRating, float AdaptabilityRating,
                       float LeadershipRating, float InitiativeRating, const std::string& Comments) :
-        ReviewId{ReviewId},
-        EmployeeId{EmployeeId},
-        ReviewerId{ReviewerId},
+        reviewId{ReviewId},
+        employeeId{EmployeeId},
+        reviewerId{ReviewerId},
         reviewDate{reviewDate},
-        OverallRating{OveralRating},
-        PunctualityRating{PunctualityRating},
-        QualityOfWorkRating{QualityOfWorkRating},
-        CommunicationRating{CommunicationRating},
-        TeamworkRating{TeamworkRating},
-        TechnicalSkillsRating{TechnicalSkillsRating},
-        ProblemSolvingRating{ProblemSolvingRating},
-        CreativityRating{CreativityRating},
-        AdaptabilityRating{AdaptabilityRating},
-        LeadershipRating{LeadershipRating},
-        InitiativeRating{InitiativeRating},
-        Comments{Comments} {
+        overallRating{OveralRating},
+        punctualityRating{PunctualityRating},
+        qualityOfWorkRating{QualityOfWorkRating},
+        communicationRating{CommunicationRating},
+        teamworkRating{TeamworkRating},
+        technicalSkillsRating{TechnicalSkillsRating},
+        problemSolvingRating{ProblemSolvingRating},
+        creativityRating{CreativityRating},
+        adaptabilityRating{AdaptabilityRating},
+        leadershipRating{LeadershipRating},
+        initiativeRating{InitiativeRating},
+        comments{Comments} {
     }
 
     // destructor
-    ~performanceReview() {
+    ~PerformanceReview() {
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const performanceReview& review) {
-    os << "Review ID : " << review.ReviewId << std::endl << "Date of Review : " << review.reviewDate << std::endl;
-    if (review.OverallRating) {
-        os << "Overall Rating : " << review.OverallRating.value() << std::endl;
+inline std::ostream& operator<<(std::ostream& os, const PerformanceReview& review) {
+    os << "Review ID : " << review.reviewId << std::endl << "Date of Review : " << review.reviewDate << std::endl;
+    if (review.overallRating) {
+        os << "Overall Rating : " << review.overallRating.value() << std::endl;
     }
-    os << "Punctuality Rating : " << review.PunctualityRating << std::endl
-       << "Quality of Work : " << review.QualityOfWorkRating << std::endl
-       << "Communication Rating : " << review.CommunicationRating << std::endl
-       << "Teamwork Rating : " << review.TeamworkRating << std::endl
-       << "Technical Skill Rating : " << review.TechnicalSkillsRating << std::endl
-       << "Problem Solving : " << review.ProblemSolvingRating << std::endl
-       << "Creativity Rating : " << review.CreativityRating << std::endl
-       << "Adaptibility Rating : " << review.AdaptabilityRating << std::endl
-       << "Leadership Rating : " << review.LeadershipRating << std::endl
-       << "Initiative Rating : " << review.InitiativeRating << std::endl;
-    if (review.Comments) {
-        os << "Comments : " << std::endl << review.Comments.value_or("") << std::endl;
+    os << "Punctuality Rating : " << review.punctualityRating << std::endl
+       << "Quality of Work : " << review.qualityOfWorkRating << std::endl
+       << "Communication Rating : " << review.communicationRating << std::endl
+       << "Teamwork Rating : " << review.teamworkRating << std::endl
+       << "Technical Skill Rating : " << review.technicalSkillsRating << std::endl
+       << "Problem Solving : " << review.problemSolvingRating << std::endl
+       << "Creativity Rating : " << review.creativityRating << std::endl
+       << "Adaptibility Rating : " << review.adaptabilityRating << std::endl
+       << "Leadership Rating : " << review.leadershipRating << std::endl
+       << "Initiative Rating : " << review.initiativeRating << std::endl;
+    if (review.comments) {
+        os << "Comments : " << std::endl << review.comments.value_or("") << std::endl;
     }
     return os;
 }

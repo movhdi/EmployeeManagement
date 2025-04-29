@@ -41,3 +41,16 @@ cmake -build .
 ./performance_manager
 </pre>
 
+
+# 6. Naming convention
+| Element | Style | Example |
+|--------|-------|---------|
+| Class/Struct Names | `PascalCase` | `Employee`, `PerformanceReview` |
+| Member Variables | `camelCase` or `m_camelCase` | `name`, `personnelCode` or `m_name` |
+| Function Names | `camelCase` | `addEmployee()`, `getReviewById()` |
+| Local Variables | `camelCase` | `reviewScore`, `managerId` |
+| Enum Types | `PascalCase` | `EmployeeRole` |
+| Enum Values | `PascalCase` or `SCREAMING_SNAKE_CASE` | `Manager`, `HR`, `ROLE_HR` |
+| SQL Table Names | `snake_case` | `employees`, `performance_reviews` |
+| SQL Column Names | `snake_case` | `employee_id`, `hire_date`, `reports_to` |
+| Constants | `SCREAMING_SNAKE_CASE` | `MAX_REVIEW_SCORE` |

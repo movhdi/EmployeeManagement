@@ -10,65 +10,63 @@ DatabaseManager::DatabaseManager(const std::string& dbAddress) : db(dbAddress) {
 
 bool DatabaseManager::InitializeDatabase() {
     try {
-        db << "CREATE TABLE IF NOT EXISTS Employees ("
-              "EmployeeID INTEGER PRIMARY KEY AUTOINCREMENT,"
-              "Name TEXT NOT NULL,"
-              "Role TEXT NOT NULL CHECK(Role IN ('Manager', 'Boss', 'Specialist', "
-              "'technician')),"
-              "ReportsTo INT,"
-              "HireDate TEXT,"
-              "PersonnelCode INT,"
-              "IsActive INT DEFAULT 1,"
-              "FOREIGN KEY (ReportsTo) REFERENCES Employees(EmployeeID)"
+        db << "CREATE TABLE IF NOT EXISTS employees ("
+              "employee_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+              "name TEXT NOT NULL,"
+              "role TEXT NOT NULL CHECK(role IN ('Manager', 'Boss', 'Specialist', "
+              "'Technician')),"
+              "reports_to INT,"
+              "hire_date TEXT,"
+              "personnel_code INT,"
+              "is_active INT DEFAULT 1,"
+              "FOREIGN KEY (reports_to) REFERENCES employees(employee_id)"
               ");";
 
-        db << "CREATE TABLE IF NOT EXISTS PerformanceReviews ("
-              "ReviewID INTEGER PRIMARY KEY AUTOINCREMENT,"
-              "EmployeeID INTEGER NOT NULL,"
-              "ReviewerID INTEGER NOT NULL,"
-              "ReviewDate DATE NOT NULL DEFAULT CURRENT_DATE,"
-              "OverallRating REAL,"
-              "Comments TEXT,"
+        db << "CREATE TABLE IF NOT EXISTS performance_reviews ("
+              "review_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+              "employee_id INTEGER NOT NULL,"
+              "reviewer_id INTEGER NOT NULL,"
+              "review_date DATE NOT NULL DEFAULT CURRENT_DATE,"
+              "overall_rating REAL,"
+              "comments TEXT,"
 
-              "PunctualityRating REAL CHECK(PunctualityRating BETWEEN 1 AND 10),"
-              "QualityOfWorkRating REAL CHECK(QualityOfWorkRating BETWEEN 1 AND "
+              "punctuality_rating REAL CHECK(punctuality_rating BETWEEN 1 AND 10),"
+              "quality_of_work_rating REAL CHECK(quality_of_work_rating BETWEEN 1 AND "
               "10),"
-              "TeamworkRating REAL CHECK(TeamworkRating BETWEEN 1 AND 10),"
-              "CommunicationRating REAL CHECK(CommunicationRating BETWEEN 1 AND "
+              "teamwork_rating REAL CHECK(teamwork_rating BETWEEN 1 AND 10),"
+              "communication_rating REAL CHECK(communication_rating BETWEEN 1 AND "
               "10),"
-              "ProblemSolvingRating REAL CHECK(ProblemSolvingRating BETWEEN 1 AND "
+              "problem_solving_rating REAL CHECK(problem_solving_rating BETWEEN 1 AND "
               "10),"
-              "CreativityRating REAL CHECK(CreativityRating BETWEEN 1 AND 10),"
-              "TechnicalSkillsRating REAL CHECK(TechnicalSkillsRating BETWEEN 1 "
+              "creativity_rating REAL CHECK(creativity_rating BETWEEN 1 AND 10),"
+              "Technical_skills_rating REAL CHECK(technical_skills_rating BETWEEN 1 "
               "AND 10),"
-              "AdaptabilityRating REAL CHECK(AdaptabilityRating BETWEEN 1 AND 10),"
-              "LeadershipRating REAL CHECK(LeadershipRating BETWEEN 1 AND 10),"
-              "InitiativeRating REAL CHECK(InitiativeRating BETWEEN 1 AND 10),"
+              "adaptability_rating REAL CHECK(adaptability_rating BETWEEN 1 AND 10),"
+              "leadership_rating REAL CHECK(leadership_rating BETWEEN 1 AND 10),"
+              "initiative_rating REAL CHECK(initiative_rating BETWEEN 1 AND 10),"
 
-              "FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),"
-              "FOREIGN KEY (ReviewerID) REFERENCES Employees(EmployeeID)"
+              "FOREIGN KEY (employee_id) REFERENCES employees(employee_id),"
+              "FOREIGN KEY (reviewer_id) REFERENCES employees(employee_id)"
               ");";
 
-        db << "CREATE INDEX IF NOT EXISTS idx_employee_name ON Employees(Name);";
-        db << "CREATE INDEX IF NOT EXISTS idx_employee_role ON Employees(Role);";
+        db << "CREATE INDEX IF NOT EXISTS idx_employee_name ON employees(name);";
+        db << "CREATE INDEX IF NOT EXISTS idx_employee_role ON employees(role);";
         db << "CREATE INDEX IF NOT EXISTS idx_review_employee_id ON "
-              "PerformanceReviews(EmployeeID);";
+              "performance_reviews(employee_id);";
         db << "CREATE INDEX IF NOT EXISTS idx_review_reviewer_id ON "
-              "PerformanceReviews(ReviewerID);";
+              "performance_reviews(reviewer_id);";
         db << "CREATE INDEX IF NOT EXISTS idx_review_date ON "
-              "PerformanceReviews(ReviewDate);";
+              "performance_reviews(review_date);";
+        return true;
     } catch (const sqlite::sqlite_exception& e) {
-        std::cerr << "Database initialization error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
-    } catch (const std::exception& e) {
-        std::cout << "Exception Occured in dataabse initialization" << std::endl;
-        std::cerr << e.what() << '\n';
-        throw;
+        std::cerr << "[IitializeDatabase] : " << "Database initialization error: " << e.what()
+                  << " (code: " << e.get_code() << ")" << std::endl;
+        return false;
     }
-    return 0;
 }
 
 bool DatabaseManager::addEmployee(const Employee& employee) {
-    if (employee.EmployeeId <= 0) {
+    if (employee.employeeId <= 0) {
         std::cerr << "Invalid employee Id " << std::endl;
         return false;
     }
@@ -80,73 +78,90 @@ bool DatabaseManager::addEmployee(const Employee& employee) {
         //    << (employee.ReportsTo.has_value() ? employee.ReportsTo.value() : NULL) << employee.HireDate
         //    << employee.personnelCode << static_cast<int>(employee.isActive);
         auto stmt =
-            db << "INSERT INTO Employees (EmployeeID, Name, Role, ReportsTo, HireDate, PersonnelCode, IsActive) "
+            db << "INSERT INTO employees (employee_id, name, role, reports_to, hire_date, personnel_code, is_active) "
                   "VALUES (?, ?, ?, ?, ?, ?, ?);";
-        stmt << employee.EmployeeId << employee.Name << roleToString(employee.role);
-        stmt << employee.ReportsTo.value_or(NULL);
+        stmt << employee.employeeId << employee.name << roleToString(employee.role);
+        stmt << employee.reportsTo.value_or(SQLITE_NULL);
         // if (employee.ReportsTo) {
         //     stmt << *employee.ReportsTo;
         // } else {
         //     stmt << nullptr;
         // }
-        stmt << employee.HireDate << employee.personnelCode << static_cast<int>(employee.isActive);
+        stmt << employee.hireDate << employee.personnelCode << static_cast<int>(employee.isActive);
         stmt.execute();
+        return true;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
+        return false;
     }
-    return true;
 }
 
-Employee DatabaseManager::getEmployee(int emplyeeId) {
-    Employee EmployeeResult;
+std::optional<Employee> DatabaseManager::getEmployee(int emplyeeId) {
+    if (emplyeeId <= 0) {
+        std::cerr << "Invalid employee id" << std::endl;
+        return std::nullopt;
+    }
+
+    Employee employeeResult;
+    bool isFound;
 
     try {
-        db << "SELECT EmployeeID, Name, ReportsTo, Role, HireDate, PersonnelCode, "
-              "IsActive FROM Employees WHERE employeeId = ?;"
+        db << "SELECT employee_id, name, reports_to, role, hire_date, personnel_code, "
+              "is_active FROM employees WHERE employee_id = ?;"
            << emplyeeId >>
-            getSingleEmployeeCollector(EmployeeResult);
+            getSingleEmployeeCollector(employeeResult, isFound);
+        return employeeResult;
     } catch (const std::exception& e) {
         std::cout << "Error in geting employee" << std::endl;
         std::cerr << e.what() << '\n';
+        return std::nullopt;
     }
-
-    return EmployeeResult;
 }
 
 std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
     std::vector<Employee> employees;
-    auto collector = getMultipleEmployeeCollector(employees);
-    try {
-        db << "SELECT * FROM Employees;" >> collector;
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
-    }
+    bool isFound{false};
 
-    return employees;
+    auto collector = getMultipleEmployeeCollector(employees, isFound);
+    try {
+        db << "SELECT * FROM employees;" >> collector;
+        return employees;
+    } catch (const std::exception& e) {
+        std::cerr << "[getAllEmployees] " << e.what() << '\n';
+        return std::nullopt;
+    }
 }
 
 std::optional<std::vector<Employee>> DatabaseManager::getEmployeesReportingToHead(const int reviewerId) {
     std::vector<Employee> employees;
-    auto collector = getMultipleEmployeeCollector(employees);
+    bool isFound{false};
+
+    auto collector = getMultipleEmployeeCollector(employees, isFound);
     try {
-        db << "SELECT * FROM Employees WHERE ReportsTo = ?;" << reviewerId >> collector;
+        db << "SELECT * FROM employees WHERE reports_to = ?;" << reviewerId >> collector;
+        if (isFound) {
+            return employees;
+        } else {
+            return std::nullopt;
+        }
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
+        return std::nullopt;
     }
-    return employees;
 }
 
 bool DatabaseManager::updateEmployee(const Employee& employee) {
-    if (employee.EmployeeId <= 0) {
+    if (employee.employeeId <= 0) {
         std::cerr << "Invalid employee Id " << std::endl;
         return false;
     }
     try {
-        db << "UPDATE Employees SET Name = ?, Role = ?, ReportsTo = ?, HireDate = ?, PersonnelCode = ?, IsActive = ? "
+        db << "UPDATE employees SET name = ?, role = ?, reports_to = ?, hire_date = ?, personnel_code = ?, is_active = "
+              "? "
               "WHERE "
-              "EmployeeID = ?;"
-           << employee.Name << roleToString(employee.role) << employee.ReportsTo << employee.HireDate
-           << employee.personnelCode << employee.isActive << employee.EmployeeId;
+              "employee_id = ?;"
+           << employee.name << roleToString(employee.role) << employee.reportsTo << employee.hireDate
+           << employee.personnelCode << employee.isActive << employee.employeeId;
     } catch (const sqlite::sqlite_exception& e) {
         std::cerr << "employee update error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
     } catch (const std::exception& e) {
@@ -161,61 +176,77 @@ bool DatabaseManager::deactivateEmployee(int employeeId) {
         return false;
     }
     try {
-        auto stmt = db << "UPDATE Employees SET IsActive = ? WHERE EmployeeID = ?;";
+        auto stmt = db << "UPDATE employees SET is_active = ? WHERE employee_id = ?;";
         stmt << 0 << employeeId;
         stmt.execute();
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
-    }
-    return true;
-}
-
-bool DatabaseManager::addPerformanceReview(const performanceReview& review) {
-    try {
-        auto stmt = db << "INSERT INTO PerformanceReviews (ReviewID, EmployeeID, ReviewerID, OverallRating, Comments,"
-                          "PunctualityRating, QualityOfWorkRating, TeamworkRating, "
-                          "CommunicationRating, ProblemSolvingRating, CreativityRating, TechnicalSkillsRating, "
-                          "AdaptabilityRating, LeadershipRating, InitiativeRating) VALUES (?, ?, ?, ?, ?, ?, "
-                          "?, ?, ?, ? ,? ,?, ?, ?, ?);";
-        stmt << review.ReviewId << review.EmployeeId << review.ReviewerId << review.OverallRating.value()
-             << review.Comments.value() << review.PunctualityRating << review.QualityOfWorkRating
-             << review.TeamworkRating << review.CommunicationRating << review.ProblemSolvingRating
-             << review.CreativityRating << review.TechnicalSkillsRating << review.AdaptabilityRating
-             << review.LeadershipRating << review.InitiativeRating;
-        stmt.execute();
-    } catch (const sqlite::sqlite_exception& e) {
-        std::cerr << "Review insertion failure : " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
+        return true;
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
     }
     return false;
 }
 
-std::optional<performanceReview> DatabaseManager::getPerformanceReview(int reviewId) {
-    performanceReview review;
-    auto collector = getPerformanceReviewCollector(review);
+bool DatabaseManager::addPerformanceReview(const PerformanceReview& review) {
     try {
-        db << "SELECT * FROM PerformanceReviews WHERE ReviewID = (?);" << reviewId >> collector;
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        auto stmt =
+            db << "INSERT INTO performance_reviews (review_id, employee_id, reviewer_id, overall_rating, comments,"
+                  "punctuality_rating, quality_of_work_rating, teamwork_rating, "
+                  "communication_rating, problem_solving_rating, creativity_rating, technical_skills_rating, "
+                  "adaptability_rating, leadership_rating, initiative_rating) VALUES (?, ?, ?, ?, ?, ?, "
+                  "?, ?, ?, ? ,? ,?, ?, ?, ?);";
+        stmt << review.reviewId << review.employeeId << review.reviewerId << review.overallRating.value_or(SQLITE_NULL)
+             << review.comments.value_or(nullptr) << review.punctualityRating << review.qualityOfWorkRating
+             << review.teamworkRating << review.communicationRating << review.problemSolvingRating
+             << review.creativityRating << review.technicalSkillsRating << review.adaptabilityRating
+             << review.leadershipRating << review.initiativeRating;
+        stmt.execute();
+    } catch (const sqlite::sqlite_exception& e) {
+        std::cerr << "[addPerformanceReview] :" << "Review insertion failure : " << e.what()
+                  << " (code: " << e.get_code() << ")" << std::endl;
+        return false;
     }
-    return review;
+    return true;
 }
 
-std::optional<performanceReview> DatabaseManager::getPerformanceForEmployee(const int& employeeId) {
-    performanceReview review;
-    auto collector = getPerformanceReviewCollector(review);
+std::optional<PerformanceReview> DatabaseManager::getPerformanceReview(int reviewId) {
+    PerformanceReview review;
+    bool isFound{false};
+
+    auto collector = getPerformanceReviewCollector(review, isFound);
     try {
-        db << "SELECT * FROM PerformanceReviews WHERE EmployeeID = (?);" << employeeId >> collector;
+        db << "SELECT * FROM performance_reviews WHERE review_id = (?);" << reviewId >> collector;
+        if (isFound) {
+            return review;
+        } else {
+            return std::nullopt;
+        }
+
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
+        return std::nullopt;
     }
-
-    return review;
 }
 
-std::optional<std::vector<performanceReview>> DatabaseManager::getReviewByReviewe(int reviewerId) {
-    return std::optional<std::vector<performanceReview>>();
+std::optional<PerformanceReview> DatabaseManager::getPerformanceForEmployee(const int& employeeId) {
+    PerformanceReview review;
+    bool isFound{false};
+    auto collector = getPerformanceReviewCollector(review, isFound);
+    try {
+        db << "SELECT * FROM performance_reviews WHERE employee_id = (?);" << employeeId >> collector;
+        if (isFound) {
+            return review;
+        } else {
+            return std::nullopt;
+        }
+
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return std::nullopt;
+    }
+}
+
+std::optional<std::vector<PerformanceReview>> DatabaseManager::getReviewByReviewe(int reviewerId) {
+    return std::optional<std::vector<PerformanceReview>>();
 }
 
 bool DatabaseManager::updatePerformanceReview(int reviewId) {
@@ -227,58 +258,61 @@ bool DatabaseManager::deletePerformanceReview(int reviewId) {
 }
 
 std::function<void(int, std::string, std::string, int, std::string, int, bool)>
-DatabaseManager::getMultipleEmployeeCollector(std::vector<Employee>& employees) const {
-    return [&employees](int EmployeeId, std::string Name, std::string role, int reportsTo, std::string hireDate,
-                        int personnelCode, bool isActive) {
-        Employee tempEmployee;
-        tempEmployee.EmployeeId = EmployeeId;
-        tempEmployee.Name = Name;
-        tempEmployee.role = PerfMgmt::stringToRole(role).value();
-        tempEmployee.ReportsTo = reportsTo;
-        tempEmployee.HireDate = hireDate;
-        tempEmployee.isActive = isActive;
-        tempEmployee.personnelCode = personnelCode;
-        employees.push_back(tempEmployee);
+DatabaseManager::getMultipleEmployeeCollector(std::vector<Employee>& employees, bool& isFound) const {
+    return [&](int EmployeeId, std::string Name, std::string role, std::optional<int> reportsTo, std::string hireDate,
+               int personnelCode, bool isActive) {
+        Employee employee;
+        employee.employeeId = EmployeeId;
+        employee.name = Name;
+        employee.role = PerfMgmt::stringToRole(role).value();
+        employee.reportsTo = reportsTo;
+        employee.hireDate = hireDate;
+        employee.isActive = isActive;
+        employee.personnelCode = personnelCode;
+        employees.push_back(employee);
+        isFound = true;
     };
 }
 
 std::function<void(int, std::string, int, std::string, std::string, int, bool)>
-DatabaseManager::getSingleEmployeeCollector(Employee& employee) const {
-    return [&](int EmployeeId, std::string Name, int ReportsTo, std::string Role, std::string HireDate,
-               int personnelCode, bool IsActive) {
-        employee.EmployeeId = EmployeeId;
-        employee.Name = Name;
-        employee.ReportsTo = ReportsTo;
-        employee.HireDate = HireDate;
-        employee.role = stringToRole(Role).value();
+DatabaseManager::getSingleEmployeeCollector(Employee& employee, bool& isFound) const {
+    return [&](int employeeId, std::string name, std::optional<int> reportsTo, std::string roleStr,
+               std::string hireDate, int personnelCode, bool isActive) {
+        employee.employeeId = employeeId;
+        employee.name = name;
+        employee.reportsTo = reportsTo;
+        employee.hireDate = hireDate;
+        employee.role = stringToRole(roleStr).value();
         employee.personnelCode = personnelCode;
-        employee.isActive = IsActive;
+        employee.isActive = isActive;
+        isFound = true;
     };
 }
 
 std::function<void(int, int, int, std::string, float, std::string, float, float, float, float, float, float, float,
                    float, float, float)>
-DatabaseManager::getPerformanceReviewCollector(performanceReview& review) const {
-    return [&](int ReviewID, int EmployeeID, int ReviewerID, std::string ReviewDate, float OverallRating,
-               std::string Comments, float PunctualityRating, float QualityOfWorkRating, float TeamworkRating,
-               float CommunicationRating, float ProblemSolvingRating, float CreativityRating,
-               float TechnicalSkillRating, float AdaptibilityRating, float LeadershipRating, float InitiativeRating) {
-        review.ReviewId = ReviewID;
-        review.EmployeeId = EmployeeID;
-        review.ReviewerId = ReviewerID;
-        review.reviewDate = ReviewDate;
-        review.OverallRating = OverallRating;
-        review.PunctualityRating = PunctualityRating;
-        review.QualityOfWorkRating = QualityOfWorkRating;
-        review.TeamworkRating = TeamworkRating;
-        review.CommunicationRating = CommunicationRating;
-        review.ProblemSolvingRating = ProblemSolvingRating;
-        review.CreativityRating = CreativityRating;
-        review.TechnicalSkillsRating = TechnicalSkillRating;
-        review.AdaptabilityRating = AdaptibilityRating;
-        review.LeadershipRating = LeadershipRating;
-        review.InitiativeRating = InitiativeRating;
-        review.Comments = Comments;
+DatabaseManager::getPerformanceReviewCollector(PerformanceReview& review, bool& isFound) const {
+    return [&](int ReviewID, int employeeId, int reviewerId, std::string reviewDate, float overallRating,
+               std::string comments, float punctualityRating, float qualityOfWorkRating, float teamworkRating,
+               float communicationRating, float problemSolvingRating, float creativityRating,
+               float technicalSkillRating, float adaptibilityRating, float leadershipRating, float initiativeRating) {
+        review.reviewId = ReviewID;
+        review.employeeId = employeeId;
+        review.reviewerId = reviewerId;
+        review.reviewDate = reviewDate;
+        review.overallRating = overallRating;
+        review.punctualityRating = punctualityRating;
+        review.qualityOfWorkRating = qualityOfWorkRating;
+        review.teamworkRating = teamworkRating;
+        review.communicationRating = communicationRating;
+        review.problemSolvingRating = problemSolvingRating;
+        review.creativityRating = creativityRating;
+        review.technicalSkillsRating = technicalSkillRating;
+        review.adaptabilityRating = adaptibilityRating;
+        review.leadershipRating = leadershipRating;
+        review.initiativeRating = initiativeRating;
+        review.comments = comments;
+        isFound = true;
     };
 }
 
