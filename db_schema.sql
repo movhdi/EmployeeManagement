@@ -1,44 +1,50 @@
 -- Table to store employee information
-CREATE TABLE IF NOT EXISTS Employees (
-    EmployeeID INTEGER PRIMARY KEY AUTOINCREMENT,
-    Name TEXT NOT NULL,
-    Role TEXT NOT NULL CHECK(Role IN ('Manager', 'Boss', 'Developer', 'Technician')),
-    ReportsTo INT,
-    HireDate DATE,
-    IsActive INT DEFAULT 1,
-    FOREIGN KEY (ReportsTo) REFERENCES Employees(EmployeeID)
-);
+CREATE TABLE IF NOT EXISTS employees (
+              employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              role TEXT NOT NULL CHECK(role IN ('Manager', 'Boss', 'Specialist', 
+              'Technician')),
+              reports_to INT,
+              hire_date TEXT,
+              personnel_code INT,
+              is_active INT DEFAULT 1,
+              FOREIGN KEY (reports_to) REFERENCES employees(employee_id)
+              );
 
 -- Table to store performance review data
-CREATE TABLE IF NOT EXISTS PerformanceReviews (
-    ReviewID INTEGER PRIMARY KEY AUTOINCREMENT,
-    EmployeeID INT NOT NULL,
-    ReviewerID INT NOT NULL,
-    ReviewDate DATE NOT NULL DEFAULT CURRENT_DATE,
-    OverallRating REAL, -- Optional overall score  
-    Comments TEXT,
+CREATE TABLE IF NOT EXISTS performance_reviews (
+        review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        employee_id INTEGER NOT NULL,
+        reviewer_id INTEGER NOT NULL,
+        review_date DATE NOT NULL DEFAULT CURRENT_DATE,
+        overall_rating REAL,
+        comments TEXT,
 
-    -- Key Performance Indicators (KPI) range 1 to 10
-    PunctualityRating REAL CHECK(PunctualityRating BETWEEN 1 AND 10),
-    QualityOfWorkRating REAL CHECK(QualityOfWorkRating BETWEEN 1 AND 10),
-    TeamworkRating REAL CHECK(TeamworkRating BETWEEN 1 AND 10),
-    CommunicationRating REAL CHECK(CommunicationRating BETWEEN 1 AND 10),
-    ProblemSolvingRating REAL CHECK(ProblemSolvingRating BETWEEN 1 AND 10),
-    CreativityRating REAL CHECK(CreativityRating BETWEEN 1 AND 10),
-    TechnicalSkillsRating REAL CHECK(TechnicalSkillsRating BETWEEN 1 AND 10),
-    AdaptabilityRating REAL CHECK(AdaptabilityRating BETWEEN 1 AND 10),
-    LeadershipRating REAL CHECK(LeadershipRating BETWEEN 1 AND 10),
-    InitiativeRating REAL CHECK(InitiativeRating BETWEEN 1 AND 10),
-    
-    -- Optional fields for additional comments
+        -- Key Performance Indicators (KPI) range 1 to 10
+        punctuality_rating REAL CHECK(punctuality_rating BETWEEN 1 AND 10),
+        quality_of_work_rating REAL CHECK(quality_of_work_rating BETWEEN 1 AND 
+        10),
+        teamwork_rating REAL CHECK(teamwork_rating BETWEEN 1 AND 10),
+        communication_rating REAL CHECK(communication_rating BETWEEN 1 AND 
+        10),
+        problem_solving_rating REAL CHECK(problem_solving_rating BETWEEN 1 AND 
+        10),
+        creativity_rating REAL CHECK(creativity_rating BETWEEN 1 AND 10),
+        Technical_skills_rating REAL CHECK(technical_skills_rating BETWEEN 1 
+        AND 10),
+        adaptability_rating REAL CHECK(adaptability_rating BETWEEN 1 AND 10),
+        leadership_rating REAL CHECK(leadership_rating BETWEEN 1 AND 10),
+        initiative_rating REAL CHECK(initiative_rating BETWEEN 1 AND 10),
 
-    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID),
-    FOREIGN KEY (ReviewerID) REFERENCES Employees(EmployeeID)
+        FOREIGN KEY (employee_id) REFERENCES employees(employee_id),
+        FOREIGN KEY (reviewer_id) REFERENCES employees(employee_id)
 );
 
--- Optional indexes for faster lookups
-CREATE INDEX IF NOT EXISTS idx_employee_name ON Employees(Name);
-CREATE INDEX IF NOT EXISTS idx_employee_role ON Employees(Role);
-CREATE INDEX IF NOT EXISTS idx_review_employee_id ON PerformanceReviews(EmployeeID);
-CREATE INDEX IF NOT EXISTS idx_review_reviewer_id ON PerformanceReviews(ReviewerID);
-CREATE INDEX IF NOT EXISTS idx_review_date ON PerformanceReviews(ReviewDate);
+CREATE INDEX IF NOT EXISTS idx_employee_name ON employees(name);
+CREATE INDEX IF NOT EXISTS idx_employee_role ON employees(role);
+CREATE INDEX IF NOT EXISTS idx_review_employee_id ON 
+performance_reviews(employee_id);
+CREATE INDEX IF NOT EXISTS idx_review_reviewer_id ON
+performance_reviews(reviewer_id);
+CREATE INDEX IF NOT EXISTS idx_review_date ON
+performance_reviews(review_date);
