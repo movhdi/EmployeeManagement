@@ -22,11 +22,28 @@ FetchContent_Declare(
                          # Check the repo for the latest stable tag
 )
 
+FetchContent_Declare(
+  date
+  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
+  GIT_TAG        v3.0.1  # Use a specific tag or commit hash for stability
+                         # Check the repo for the latest stable tag
+)
+
+FetchContent_Declare(
+  httplib
+  GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+  GIT_TAG        v0.15.3  # Use a specific tag or commit hash for stability
+                         # Check the repo for the latest stable tag
+)
+
 
 # --- Make sqlite_modern_cpp available ---
 # Downloads the source code into the build directory (e.g., build/_deps/sqlite_modern_cpp-src)
 # and makes variables like sqlite_modern_cpp_SOURCE_DIR available.
 FetchContent_MakeAvailable(sqlite_modern_cpp)
+
+FetchContent_MakeAvailable(date)
+FetchContent_MakeAvailable(httplib)
 
 # --- Find SQLite3 ---
 find_package(SQLite3 REQUIRED)
@@ -58,6 +75,10 @@ target_include_directories(${EXECUTABLE_NAME} PRIVATE
     include # Our project's include directory
     # Add the header directory from the fetched content for sqlite_modern_cpp
     ${sqlite_modern_cpp_SOURCE_DIR}/hdr
+
+    ${date_SOURCE_DIR}/include         # date library headers
+    ${cpp_httplib_SOURCE_DIR}          # cpp-httplib is directly in source dir
+
     # Add the include directory for the base SQLite3 C library
     ${SQLite3_INCLUDE_DIRS}
 )

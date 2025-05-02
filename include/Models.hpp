@@ -55,12 +55,59 @@ inline std::optional<Role> stringToRole(const std::string& roleStr) {
     }
 }
 
+enum class FunctionTeams {
+    HARDWARE,
+    SOFTWARE,
+    MECHANIC,
+    ENGINEERING,
+    PRODUCT
+};
+
+inline std::string functionTeamsToString(FunctionTeams functionTeam) {
+    switch (functionTeam) {
+    case FunctionTeams::HARDWARE:
+        return "HARDWARE";
+        break;
+    case FunctionTeams::SOFTWARE:
+        return "SOFTWARE";
+        break;
+    case FunctionTeams::MECHANIC:
+        return "MECHANIC";
+        break;
+    case FunctionTeams::ENGINEERING:
+        return "ENGINEERING";
+        break;
+    case FunctionTeams::PRODUCT:
+        return "PRODUCT";
+        break;
+    default:
+        return "unknown";
+        break;
+    }
+}
+
+inline std::optional<FunctionTeams> stringToFunctionTeams(const std::string& functionstr) {
+    if (functionstr == "HARDWARE") {
+        return FunctionTeams::HARDWARE;
+    } else if (functionstr == "SOFTWARE") {
+        return FunctionTeams::SOFTWARE;
+    } else if (functionstr == "ENGINEERING") {
+        return FunctionTeams::ENGINEERING;
+    } else if (functionstr == "MECHANIC") {
+        return FunctionTeams::MECHANIC;
+    } else if (functionstr == "PRODUCT") {
+        return FunctionTeams::PRODUCT;
+    } else {
+        return std::nullopt;
+    }
+}
 struct Employee {
     int employeeId{0};
     int personnelCode{};
     std::string name{};
     std::string hireDate{};
     Role role = Role::SPECIALIST; // Default specialist
+    // FunctionTeams team;
     bool isActive{true};
     std::optional<int> reportsTo{std::nullopt};
 
