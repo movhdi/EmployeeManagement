@@ -1,5 +1,6 @@
 #include <DatabaseManager.hpp>
 #include <Models.hpp>
+#include <NetworkManager.hpp>
 #include <iostream>
 
 namespace PerfMgmt {
@@ -48,6 +49,8 @@ void test_App() {
     if (review) {
         std::cout << review.value();
     }
+    NetworkManager networkManager("127.0.0.1:5000");
+    networkManager.fetchAllEmployees();
 }
 
 } // namespace PerfMgmt

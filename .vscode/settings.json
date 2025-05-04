@@ -62,6 +62,19 @@
         "variant": "cpp",
         "condition_variable": "cpp",
         "list": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "csignal": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "coroutine": "cpp",
+        "forward_list": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "regex": "cpp",
+        "source_location": "cpp",
+        "fstream": "cpp",
+        "future": "cpp",
+        "typeindex": "cpp",
+        "valarray": "cpp"
     }
 }

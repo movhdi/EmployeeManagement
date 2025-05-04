@@ -21,6 +21,7 @@ FetchContent_Declare(
   GIT_TAG        v3.2  # Use a specific tag or commit hash for stability
                          # Check the repo for the latest stable tag
 )
+FetchContent_MakeAvailable(sqlite_modern_cpp)
 
 FetchContent_Declare(
   date
@@ -29,21 +30,21 @@ FetchContent_Declare(
                          # Check the repo for the latest stable tag
 )
 
-FetchContent_Declare(
-  httplib
-  GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
-  GIT_TAG        v0.15.3  # Use a specific tag or commit hash for stability
-                         # Check the repo for the latest stable tag
-)
+FetchContent_MakeAvailable(date)
 
+FetchContent_Declare(
+    httplib
+    GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+    GIT_TAG        v0.20.1  # Use a specific tag or commit hash for stability
+    # Check the repo for the latest stable tag
+    )
+    
+FetchContent_MakeAvailable(httplib)
 
 # --- Make sqlite_modern_cpp available ---
 # Downloads the source code into the build directory (e.g., build/_deps/sqlite_modern_cpp-src)
 # and makes variables like sqlite_modern_cpp_SOURCE_DIR available.
-FetchContent_MakeAvailable(sqlite_modern_cpp)
 
-FetchContent_MakeAvailable(date)
-FetchContent_MakeAvailable(httplib)
 
 # --- Find SQLite3 ---
 find_package(SQLite3 REQUIRED)
@@ -59,6 +60,7 @@ set(EXECUTABLE_NAME EmployeePerformanceManager)
 add_executable(${EXECUTABLE_NAME} 
     src/main.cpp
     src/DatabaseManager.cpp
+    src/NetworkManager.cpp
     src/test.cpp
 )
 
@@ -68,7 +70,7 @@ target_include_directories(${EXECUTABLE_NAME} PRIVATE
     include # Our project's include directory
     ${SQLite3_INCLUDE_DIRS} # SQLite3 header directory found by find_package
 )
-
+message(STATUS "Path to httplib: ${httplib_SOURCE_DIR}")
 # --- Include Directories ---
 # Tell CMake where to find header files
 target_include_directories(${EXECUTABLE_NAME} PRIVATE
@@ -77,7 +79,7 @@ target_include_directories(${EXECUTABLE_NAME} PRIVATE
     ${sqlite_modern_cpp_SOURCE_DIR}/hdr
 
     ${date_SOURCE_DIR}/include         # date library headers
-    ${cpp_httplib_SOURCE_DIR}          # cpp-httplib is directly in source dir
+    ${httplib_SOURCE_DIR}          # cpp-httplib is directly in source dir
 
     # Add the include directory for the base SQLite3 C library
     ${SQLite3_INCLUDE_DIRS}
