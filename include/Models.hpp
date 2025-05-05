@@ -1,10 +1,12 @@
 #ifndef MODELS_HPP
 #define MODELS_HPP
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <stdexcept>
 #include <string>
 
+using json = nlohmann::json;
 namespace PerfMgmt {
 
 enum class Role {
@@ -110,6 +112,9 @@ struct Employee {
     // FunctionTeams team;
     bool isActive{true};
     std::optional<int> reportsTo{std::nullopt};
+
+    friend void to_json(json& j, const Employee& employee);
+    friend void from_json(const json& j, Employee& employee);
 
 public:
     // Constructor

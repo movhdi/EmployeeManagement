@@ -62,6 +62,7 @@ add_executable(${EXECUTABLE_NAME}
     src/DatabaseManager.cpp
     src/NetworkManager.cpp
     src/test.cpp
+    src/Models.cpp
 )
 
 # --- Include Directories ---
