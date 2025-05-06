@@ -67,7 +67,7 @@ bool DatabaseManager::InitializeDatabase() {
 
 bool DatabaseManager::addEmployee(const Employee& employee) {
     if (employee.employeeId <= 0) {
-        std::cerr << "Invalid employee Id " << std::endl;
+        std::cerr << "[addEmployee] : " << "Invalid employee Id " << std::endl;
         return false;
     }
     try {
@@ -80,14 +80,14 @@ bool DatabaseManager::addEmployee(const Employee& employee) {
         stmt.execute();
         return true;
     } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[addEmployee] : " << e.what() << '\n';
         return false;
     }
 }
 
 std::optional<Employee> DatabaseManager::getEmployee(int emplyeeId) {
     if (emplyeeId <= 0) {
-        std::cerr << "Invalid employee id" << std::endl;
+        std::cerr << "[getEmployee] : " << "Invalid employee id" << std::endl;
         return std::nullopt;
     }
 
@@ -106,7 +106,7 @@ std::optional<Employee> DatabaseManager::getEmployee(int emplyeeId) {
         }
 
     } catch (const std::exception& e) {
-        std::cerr << "Error in geting employee" << e.what() << '\n';
+        std::cerr << "[getEmployee] : " << "Error in geting employee" << e.what() << '\n';
         return std::nullopt;
     }
 }
@@ -120,7 +120,7 @@ std::optional<std::vector<Employee>> DatabaseManager::getAllEmployees() {
         db << "SELECT * FROM employees;" >> collector;
         return employees;
     } catch (const std::exception& e) {
-        std::cerr << "[getAllEmployees] " << e.what() << '\n';
+        std::cerr << "[getAllEmployees] : " << e.what() << '\n';
         return std::nullopt;
     }
 }
@@ -143,14 +143,14 @@ std::optional<std::vector<Employee>> DatabaseManager::getEmployeesReportingToHea
             return std::nullopt;
         }
     } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[getEmployeeReportingToHead] : " << e.what() << '\n';
         return std::nullopt;
     }
 }
 
 bool DatabaseManager::updateEmployee(const Employee& employee) {
     if (employee.employeeId <= 0) {
-        std::cerr << "Invalid employee Id " << std::endl;
+        std::cerr << "[updateEmployee] : " << "Invalid employee Id " << std::endl;
         return false;
     }
     try {
@@ -161,16 +161,15 @@ bool DatabaseManager::updateEmployee(const Employee& employee) {
            << employee.name << roleToString(employee.role) << employee.reportsTo << employee.hireDate
            << employee.personnelCode << employee.isActive << employee.employeeId;
     } catch (const sqlite::sqlite_exception& e) {
-        std::cerr << "employee update error: " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[updateEmployee] : " << "employee update error: " << e.what() << " (code: " << e.get_code() << ")"
+                  << std::endl;
     }
     return true;
 }
 
 bool DatabaseManager::deactivateEmployee(int employeeId) {
     if (employeeId <= 0) {
-        std::cerr << "Invalid employee ID!" << std::endl;
+        std::cerr << "[deactivateEmployee] : " << "Invalid employee ID!" << std::endl;
         return false;
     }
     try {
@@ -200,15 +199,14 @@ bool DatabaseManager::addPerformanceReview(const PerformanceReview& review) {
         stmt.execute();
         return true;
     } catch (const sqlite::sqlite_exception& e) {
-        std::cerr << "[addPerformanceReview] :" << "Review insertion failure : " << e.what()
-                  << " (code: " << e.get_code() << ")" << std::endl;
+        std::cerr << "[addPerformanceReview] : " << e.what() << " (code: " << e.get_code() << ")" << std::endl;
         return false;
     }
 }
 
 std::optional<PerformanceReview> DatabaseManager::getPerformanceReview(const int& reviewId) {
     if (reviewId <= 0) {
-        std::cerr << "Invalid review id" << std::endl;
+        std::cerr << "[getPerformanceReview] : " << "Invalid review id" << std::endl;
         return std::nullopt;
     }
 
@@ -225,7 +223,7 @@ std::optional<PerformanceReview> DatabaseManager::getPerformanceReview(const int
         }
 
     } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[getPerformanceReview] : " << e.what() << '\n';
         return std::nullopt;
     }
 }
@@ -243,7 +241,7 @@ std::optional<PerformanceReview> DatabaseManager::getPerformanceForEmployee(cons
         }
 
     } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[getPerformanceForEmployee] : " << e.what() << '\n';
         return std::nullopt;
     }
 }

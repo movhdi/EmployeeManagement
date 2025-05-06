@@ -10,13 +10,17 @@ void to_json(json& j, const Employee& employee) {
     }
 }
 void from_json(const json& j, Employee& employee) {
-    employee.employeeId = j.at("employeeId");
-    employee.hireDate = j.at("hireDate");
-    employee.name = j.at("name");
-    employee.personnelCode = j.at("personnelCode");
-    employee.role = stringToRole(j.at("role")).value();
-    if (j.contains("reportsTo")) {
-        employee.reportsTo = j.at("reportsTo");
+    employee.employeeId = j.at("employeeId").get<int>();
+    employee.hireDate = j.at("hireDate").get<std::string>();
+    employee.name = j.at("name").get<std::string>();
+    employee.personnelCode = j.at("personnelCode").get<int>();
+    employee.role = stringToRole(j.at("role").get<std::string>()).value();
+    if (j.contains("reportsTo") and !j["reportsTo"].is_null()) {
+        employee.reportsTo = j.at("reportsTo").get<int>();
     }
+    employee.isActive = j.at("isActive").get<bool>();
+    // if (j.contains("team")) {
+    //     employee.team = stringToFunctionTeams(j.at("team")).value();
+    // }
 }
 } // namespace PerfMgmt

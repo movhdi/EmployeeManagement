@@ -7,9 +7,9 @@ app = Flask(__name__)
 # --- Mock Data ---
 # Keep track of data (in memory, resets when server restarts)
 mock_employees = {
-    1: {"id": 1,"personnelCode": 981207, "name": "Alice Manager (Mock)", "role": "MANAGER", "reportsTo": None, "isActive": True, "hireDate": "2023-01-15T10:00:00Z"},
-    2: {"id": 2, "personnelCode": 981208,"name": "Bob Boss (Mock)", "role": "BOSS", "reportsTo": 1, "isActive": True, "hireDate": "2023-02-20T11:30:00Z"},
-    3: {"id": 3, "personnelCode": 981209, "name": "Charlie Specialist (Mock)", "role": "SPECIALIST", "reportsTo": 2, "isActive": True, "hireDate": "2023-03-10T09:15:00Z"}
+    1: {"employeeId": 1,"personnelCode": 981207, "name": "Alice Manager (Mock)", "role": "Manager", "reportsTo": None, "isActive": True, "hireDate": "2023-01-15T10:00:00Z"},
+    2: {"employeeId": 2, "personnelCode": 981208,"name": "Bob Boss (Mock)", "role": "Boss", "reportsTo": 1, "isActive": True, "hireDate": "2023-02-20T11:30:00Z"},
+    3: {"employeeId": 3, "personnelCode": 981209, "name": "Charlie Specialist (Mock)", "role": "Specialist", "reportsTo": 2, "isActive": True, "hireDate": "2023-03-10T09:15:00Z"}
 }
 mock_reviews = {
     101: {"reviewId": 101, "employeeId": 2, "reviewerId": 1, "reviewDate": "2024-05-01T14:00:00Z", "overallRating": 4.0, "comments": "Good progress (Mock)", "punctuality": 5},
@@ -55,7 +55,7 @@ def add_employee():
          return jsonify({"error": "Missing required fields (name, role)"}), 400
 
     new_employee = {
-        "id": next_employee_id,
+        "employeeId": next_employee_id,
         "personnelCode" : data.get("personnelCode"),
         "name": data.get("name"),
         "role": data.get("role"),

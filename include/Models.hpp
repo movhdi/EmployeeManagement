@@ -104,7 +104,7 @@ inline std::optional<FunctionTeams> stringToFunctionTeams(const std::string& fun
     }
 }
 struct Employee {
-    int employeeId{0};
+    int employeeId{};
     int personnelCode{};
     std::string name{};
     std::string hireDate{};
@@ -143,7 +143,7 @@ inline std::ostream& operator<<(std::ostream& os, const Employee& emp) {
        << "Hire Date: " << emp.hireDate << std::endl
        << "Role: " << emp.role << std::endl
        << "Employee Status: " << (static_cast<bool>(emp.isActive) ? "Active" : "Not-Active") << std::endl
-       << "ReportsTo: " << (emp.reportsTo ? std::to_string(*emp.reportsTo) : "null") << std::endl;
+       << "ReportsTo: " << (emp.reportsTo.has_value() ? std::to_string(*emp.reportsTo) : "null") << std::endl;
     return os;
 }
 

@@ -21,11 +21,11 @@ void test_App() {
 
     auto employees = db.getAllEmployees();
 
-    if (employees) {
-        for (const auto& employee : employees.value()) {
-            std::cout << employee;
-        }
-    }
+    // if (employees) {
+    //     for (const auto& employee : employees.value()) {
+    //         std::cout << employee;
+    //     }
+    // }
     // db.updateEmployee(employee5);
     // auto employees = db.getEmployeesReportingToHead(0);
     // if (employees) {
@@ -36,19 +36,19 @@ void test_App() {
 
     db.deactivateEmployee(4);
 
-    if (auto result = db.getEmployee(4)) {
-        std::cout << result.value();
-    }
+    // if (auto result = db.getEmployee(4)) {
+    //     std::cout << result.value();
+    // }
 
     // Do some performance review insertion and extraction
     PerformanceReview reviewForEmployee2(1, 2, 1, "2025-04-27", 9.5f, 9.0f, 8.5f, 8.0f, 9.0f, 9.9f, 10.0f, 10.0f, 8.0f,
                                          7.0f, 10.0f, "He is good!");
     db.addPerformanceReview(reviewForEmployee2);
     auto review = db.getPerformanceForEmployee(2);
-    std::cout << "-----------Review------------" << std::endl;
-    if (review) {
-        std::cout << review.value();
-    }
+    // std::cout << "-----------Review------------" << std::endl;
+    // if (review) {
+    //     std::cout << review.value();
+    // }
     NetworkManager networkManager("127.0.0.1:5000");
     networkManager.fetchAllEmployees();
 }

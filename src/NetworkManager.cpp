@@ -17,20 +17,23 @@ std::optional<std::vector<Employee>> NetworkManager::fetchAllEmployees() {
 
     try {
         json j = json::parse(body);
-        std::cout << std::setw(4) << j << "\n\n";
+        // std::cout << std::setw(4) << j << "\n\n";
         for (const auto& jsonItem : j) {
-            resutlVec.emplace_back(Employee(static_cast<int>(jsonItem["id"]), 2025121, std::string(jsonItem["name"]),
-                                            std::string(jsonItem["hireDate"]),
-                                            stringToRole(std::string(jsonItem["role"])).value(), jsonItem["isActive"],
-                                            std::nullopt));
+            // resutlVec.emplace_back(Employee(static_cast<int>(jsonItem["id"]), 2025121, std::string(jsonItem["name"]),
+            //                                 std::string(jsonItem["hireDate"]),
+            //                                 stringToRole(std::string(jsonItem["role"])).value(),
+            //                                 jsonItem["isActive"], std::nullopt));
+            Employee empTemp;
+            from_json(jsonItem, empTemp);
+            resutlVec.emplace_back(empTemp);
         }
     } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "[fetchAllEmployees] :" << e.what() << '\n';
+        return std::nullopt;
     }
     for (const auto& item : resutlVec) {
         std::cout << item << "\n\n";
     }
-
-    return std::optional<std::vector<Employee>>();
+    return resutlVec;
 }
 } // namespace PerfMgmt
