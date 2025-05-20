@@ -1,108 +1,83 @@
-# Minimum CMake version required
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
-# Project name and version
-project(EmployeePerformanceManager LANGUAGES CXX)
+project(EmployeePerformanceManager VERSION 0.1 LANGUAGES CXX)
 
-
-# --- Set the C++ standard ---
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-# --- Include FetchContent module ---
-include(FetchContent)
-
-# --- Declare sqlite_modern_cpp dependency ---
-# Specifies where to get the library from
-FetchContent_Declare(
-  sqlite_modern_cpp
-  GIT_REPOSITORY https://github.com/SqliteModernCpp/sqlite_modern_cpp.git
-  GIT_TAG        v3.2  # Use a specific tag or commit hash for stability
-                         # Check the repo for the latest stable tag
-)
-FetchContent_MakeAvailable(sqlite_modern_cpp)
-
-FetchContent_Declare(
-  date
-  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
-  GIT_TAG        v3.0.1  # Use a specific tag or commit hash for stability
-                         # Check the repo for the latest stable tag
-)
-
-FetchContent_MakeAvailable(date)
-
-FetchContent_Declare(
-    httplib
-    GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
-    GIT_TAG        v0.20.1  # Use a specific tag or commit hash for stability
-    # Check the repo for the latest stable tag
-    )
-    
-FetchContent_MakeAvailable(httplib)
-
-# --- Make sqlite_modern_cpp available ---
-# Downloads the source code into the build directory (e.g., build/_deps/sqlite_modern_cpp-src)
-# and makes variables like sqlite_modern_cpp_SOURCE_DIR available.
-
-
-# --- Find SQLite3 ---
-find_package(SQLite3 REQUIRED)
-if(SQLite3_FOUND)
-    message(STATUS "SQLite3 found: ${SQLite3_LIBRARIES}")
+# Try to find Qt6 first
+find_package(Qt6 QUIET COMPONENTS Widgets LinguistTools Sql)
+if(Qt6_FOUND)
+    set(QT_VERSION_MAJOR 6)
+    find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Sql)
 else()
-    message(FATAL_ERROR "SQLite3 not found")
+    set(QT_VERSION_MAJOR 5)
+    find_package(Qt5 REQUIRED COMPONENTS Widgets LinguistTools Sql)
 endif()
 
-# Define the executable name
-set(EXECUTABLE_NAME EmployeePerformanceManager)
+# Add include directory
+include_directories(include)
 
-add_executable(${EXECUTABLE_NAME} 
+# You may prefer the modern style:
+# target_include_directories(EmployeePerformanceManager PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set(PROJECT_SOURCES
     src/main.cpp
     src/DatabaseManager.cpp
     src/NetworkManager.cpp
     src/test.cpp
     src/Models.cpp
+
+    include/Models.hpp
+    include/DatabaseManager.hpp
+    include/NetworkManager.hpp
+    include/test.hpp
 )
 
-# --- Include Directories ---
-# Tell CMake where to find header files
-target_include_directories(${EXECUTABLE_NAME} PRIVATE
-    include # Our project's include directory
-    ${SQLite3_INCLUDE_DIRS} # SQLite3 header directory found by find_package
-)
-message(STATUS "Path to httplib: ${httplib_SOURCE_DIR}")
-# --- Include Directories ---
-# Tell CMake where to find header files
-target_include_directories(${EXECUTABLE_NAME} PRIVATE
-    include # Our project's include directory
-    # Add the header directory from the fetched content for sqlite_modern_cpp
-    ${sqlite_modern_cpp_SOURCE_DIR}/hdr
+# If you have .ui files, list them here and make sure qt_wrap_ui or AUTOUIC handles them
+# If not, remove AUTOUIC above
 
-    ${date_SOURCE_DIR}/include         # date library headers
-    ${httplib_SOURCE_DIR}          # cpp-httplib is directly in source dir
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(EmployeePerformanceManager
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+    )
+else()
+    if(ANDROID)
+        add_library(EmployeePerformanceManager SHARED ${PROJECT_SOURCES})
+    else()
+        add_executable(EmployeePerformanceManager ${PROJECT_SOURCES})
+    endif()
+endif()
 
-    # Add the include directory for the base SQLite3 C library
-    ${SQLite3_INCLUDE_DIRS}
-)
+target_link_libraries(EmployeePerformanceManager PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql)
 
+# macOS/iOS bundle ID (safe to skip if you're not targeting Apple platforms)
+# Only needed for Qt < 6.1, define explicitly to avoid CMake error
+if(${QT_VERSION_MAJOR} LESS 6 OR Qt${QT_VERSION_MAJOR}_VERSION VERSION_LESS 6.1.0)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.EmployeePerformanceManager)
+endif()
 
-# --- Link Libraries ---
-# Link the SQLite3 C library to our executable
-# sqlite_modern_cpp is header-only, so no separate linking needed for it,
-# but our code using it needs the underlying C library.
-target_link_libraries(${EXECUTABLE_NAME} PRIVATE
-    SQLite::SQLite3 # CMake target for SQLite3 C library
-)
-
-
-install(TARGETS ${EXECUTABLE_NAME}
-     DESTINATION bin
+# Only apply BUNDLE_ID_OPTION if it's defined
+set_target_properties(EmployeePerformanceManager PROPERTIES
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    ${BUNDLE_ID_OPTION}
 )
 
-# Print configuration info (optional)
-message(STATUS "Project Name: ${PROJECT_NAME}")
-message(STATUS "CXX Standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "SQLite3 Include Dirs: ${SQLite3_INCLUDE_DIRS}")
-message(STATUS "SQLite3 Libraries: ${SQLite3_LIBRARIES}")
-message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}") # Debug, Release, etc.
+include(GNUInstallDirs)
+install(TARGETS EmployeePerformanceManager
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+if(${QT_VERSION_MAJOR} EQUAL 6)
+    qt_finalize_executable(EmployeePerformanceManager)
+endif()

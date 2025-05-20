@@ -5,8 +5,9 @@
 #include <stdexcept>
 #include <string>
 
-int main() {
-    PerfMgmt::test_App();
+int main()
+{
+   PerfMgmt::test_App();
 
-    return 0;
+   return 0;
 }

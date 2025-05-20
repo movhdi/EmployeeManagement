@@ -1,26 +1,54 @@
-#include <Models.hpp>
+#include "include/Models.hpp"
+#include <QJsonObject>
+#include <QJsonValue>
 
 namespace PerfMgmt {
-void to_json(json& j, const Employee& employee) {
-    j = json{{"employeeId", employee.employeeId}, {"name", employee.name},
-             {"hireDate", employee.hireDate},     {"personnelCode", employee.personnelCode},
-             {"isActive", employee.isActive},     {"role", roleToString(employee.role)}};
-    if (employee.reportsTo) {
-        j["reportsTo"] = employee.reportsTo.value();
-    }
+QJsonObject employeeToJson(const Employee& employee)
+{
+   QJsonObject j;
+
+   j.insert("employeeId", employee.employeeId);
+   j.insert("name", QString::fromStdString(employee.name));
+   j.insert("hireDate", QString::fromStdString(employee.hireDate));
+   j.insert("personnelCode", employee.personnelCode);
+   j.insert("isActive", employee.isActive);
+   j.insert("role", QString::fromStdString(roleToString(employee.role)));
+
+   if (employee.reportsTo.has_value())
+   {
+      j.insert("reportsTo", *employee.reportsTo);
+   }
+
+   // Example if you later use team
+   // if (employee.team.has_value()) {
+   //     j.insert("team", QString::fromStdString(functionTeamToString(employee.team.value())));
+   // }
+
+   return j;
 }
-void from_json(const json& j, Employee& employee) {
-    employee.employeeId = j.at("employeeId").get<int>();
-    employee.hireDate = j.at("hireDate").get<std::string>();
-    employee.name = j.at("name").get<std::string>();
-    employee.personnelCode = j.at("personnelCode").get<int>();
-    employee.role = stringToRole(j.at("role").get<std::string>()).value();
-    if (j.contains("reportsTo") and !j["reportsTo"].is_null()) {
-        employee.reportsTo = j.at("reportsTo").get<int>();
-    }
-    employee.isActive = j.at("isActive").get<bool>();
-    // if (j.contains("team")) {
-    //     employee.team = stringToFunctionTeams(j.at("team")).value();
-    // }
+
+Employee jsonToEmployee(const QJsonObject& j)
+{
+   Employee employee;
+
+   employee.employeeId    = j.value("employeeId").toInt();
+   employee.name          = j.value("name").toString().toStdString();
+   employee.hireDate      = j.value("hireDate").toString().toStdString();
+   employee.personnelCode = j.value("personnelCode").toInt();
+   employee.isActive      = j.value("isActive").toBool();
+
+   const auto roleStr = j.value("role").toString().toStdString();
+   employee.role = stringToRole(roleStr).value_or(EmployeeRole::Unknown);
+
+   if (j.contains("reportsTo") && !j.value("reportsTo").isNull())
+   {
+      employee.reportsTo = j.value("reportsTo").toInt();
+   }
+
+   // if (j.contains("team") && !j.value("team").isNull()) {
+   //     employee.team = stringToFunctionTeams(j.value("team").toString().toStdString()).value();
+   // }
+
+   return employee;
 }
 } // namespace PerfMgmt

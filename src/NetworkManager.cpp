@@ -1,39 +1,115 @@
-#include <NetworkManager.hpp>
-#include <string>
+#include "NetworkManager.hpp"
 
-using json = nlohmann::json;
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
+#include <QDebug>
 
 namespace PerfMgmt {
-NetworkManager::NetworkManager(const std::string& baseUrl) : httpClient(baseUrl) {
+NetworkManager::NetworkManager(const std::string& baseUrl)
+   : baseUrl(baseUrl), httpClient(baseUrl)
+{
 }
-std::optional<std::vector<Employee>> NetworkManager::fetchAllEmployees() {
 
-    std::string body;
-    std::vector<Employee> resutlVec;
-    auto res = httpClient.Get("/api/employees", [&](const char* data, size_t data_length) {
-        body.append(data, data_length);
-        return true;
-    });
+std::optional<std::vector<Employee> > NetworkManager::fetchAllEmployees()
+{
+   std::string           body;
+   std::vector<Employee> resultVec;
 
-    try {
-        json j = json::parse(body);
-        // std::cout << std::setw(4) << j << "\n\n";
-        for (const auto& jsonItem : j) {
-            // resutlVec.emplace_back(Employee(static_cast<int>(jsonItem["id"]), 2025121, std::string(jsonItem["name"]),
-            //                                 std::string(jsonItem["hireDate"]),
-            //                                 stringToRole(std::string(jsonItem["role"])).value(),
-            //                                 jsonItem["isActive"], std::nullopt));
-            Employee empTemp;
-            from_json(jsonItem, empTemp);
-            resutlVec.emplace_back(empTemp);
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "[fetchAllEmployees] :" << e.what() << '\n';
-        return std::nullopt;
-    }
-    for (const auto& item : resutlVec) {
-        std::cout << item << "\n\n";
-    }
-    return resutlVec;
+   auto                  res = httpClient.Get("/api/employees", [&](const char* data, size_t data_length) {
+         body.append(data, data_length);
+         return true;
+      });
+
+   if (!res || res->status != 200)
+   {
+      qWarning() << "[fetchAllEmployees] HTTP error or empty response.";
+      return std::nullopt;
+   }
+
+   QJsonParseError parseError;
+   QJsonDocument   doc = QJsonDocument::fromJson(QByteArray::fromStdString(body), &parseError);
+
+   if (parseError.error != QJsonParseError::NoError || !doc.isArray())
+   {
+      qWarning() << "[fetchAllEmployees] JSON parse error:" << parseError.errorString();
+      return std::nullopt;
+   }
+
+   QJsonArray jsonArray = doc.array();
+   for (const QJsonValue& val : jsonArray)
+   {
+      if (!val.isObject())
+         continue;
+
+      auto empOpt = parseEmployeeJson(val.toObject());
+      if (empOpt.has_value())
+      {
+         resultVec.push_back(empOpt.value());
+      }
+   }
+
+   for (const auto& item : resultVec)
+   {
+      std::cout << item << "\n\n";
+   }
+
+   return resultVec;
+}
+
+std::optional<Employee> NetworkManager::parseEmployeeJson(const QJsonObject& json)
+{
+   try {
+      Employee e;
+      e.employeeId    = json["id"].toInt();
+      e.name          = json["name"].toString().toStdString();
+      e.role          = stringToRole(json["role"].toString().toStdString()).value_or(Role::Specialist);
+      e.hireDate      = json["hireDate"].toString().toStdString();
+      e.personnelCode = json["personnelCode"].toInt();
+      e.isActive      = json["isActive"].toBool();
+
+      if (json.contains("reportsTo") && !json["reportsTo"].isNull())
+      {
+         e.reportsTo = json["reportsTo"].toInt();
+      }
+
+      return e;
+   } catch (...) {
+      qWarning() << "[parseEmployeeJson] Failed to parse Employee JSON.";
+      return std::nullopt;
+   }
+}
+
+std::optional<httplib::Result> NetworkManager::makeGetRequest(const std::string& path)
+{
+   auto res = httpClient.Get(path.c_str());
+
+   if (!res || res->status != 200)
+   {
+      qWarning() << "[makeGetRequest] Failed GET:" << path.c_str();
+      return std::nullopt;
+   }
+   return res;
+}
+
+std::optional<httplib::Result> NetworkManager::makePostRequest(const std::string& path, const std::string& body,
+                                                               const std::string& contentType)
+{
+   auto res = httpClient.Post(path.c_str(), body, contentType.c_str());
+
+   if (!res || res->status != 200)
+   {
+      qWarning() << "[makePostRequest] Failed POST:" << path.c_str();
+      return std::nullopt;
+   }
+   return res;
+}
+
+bool NetworkManager::isServerReachable()
+{
+   auto res = httpClient.Get("/api/ping");
+
+   return res && res->status == 200;
 }
 } // namespace PerfMgmt
