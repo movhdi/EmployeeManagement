@@ -10,13 +10,13 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 # Try to find Qt6 first
-find_package(Qt6 QUIET COMPONENTS Widgets LinguistTools Sql)
+find_package(Qt6 QUIET COMPONENTS Widgets LinguistTools Sql Network)
 if(Qt6_FOUND)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Sql)
+    find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Sql Network)
 else()
     set(QT_VERSION_MAJOR 5)
-    find_package(Qt5 REQUIRED COMPONENTS Widgets LinguistTools Sql)
+    find_package(Qt5 REQUIRED COMPONENTS Widgets LinguistTools Sql Network)
 endif()
 
 # Add include directory
@@ -54,7 +54,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(EmployeePerformanceManager PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql)
+target_link_libraries(EmployeePerformanceManager PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Network)
 
 # macOS/iOS bundle ID (safe to skip if you're not targeting Apple platforms)
 # Only needed for Qt < 6.1, define explicitly to avoid CMake error

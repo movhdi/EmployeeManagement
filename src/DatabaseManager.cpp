@@ -131,7 +131,8 @@ Employee DatabaseManager::parseEmployeeFromQuery(const QSqlQuery& query) const
 
    e.employeeId = query.value("employee_id").toInt();
    e.name       = query.value("name").toString().toStdString();
-   e.role       = stringToRole(query.value("role").toString());
+//   e.role       = stringToRole(query.value("role").toString().toStdString());
+   e.role = stringToRole(query.value("role").toString().toStdString()).value_or(Role::SPECIALIST);
 
    if (!query.value("reports_to").isNull())
    {

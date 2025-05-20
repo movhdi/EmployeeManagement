@@ -1,4 +1,4 @@
-#include "include/Models.hpp"
+#include "Models.hpp"
 #include <QJsonObject>
 #include <QJsonValue>
 
@@ -38,7 +38,7 @@ Employee jsonToEmployee(const QJsonObject& j)
    employee.isActive      = j.value("isActive").toBool();
 
    const auto roleStr = j.value("role").toString().toStdString();
-   employee.role = stringToRole(roleStr).value_or(EmployeeRole::Unknown);
+   employee.role = stringToRole(roleStr).value_or(Role::UNKNOWN);
 
    if (j.contains("reportsTo") && !j.value("reportsTo").isNull())
    {

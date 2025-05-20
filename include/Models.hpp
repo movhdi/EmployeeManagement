@@ -15,7 +15,8 @@ enum class Role
    MANAGER,
    BOSS,
    SPECIALIST,
-   TECHNICIAN
+   TECHNICIAN,
+   UNKNOWN
 };
 
 inline std::string roleToString(Role role)

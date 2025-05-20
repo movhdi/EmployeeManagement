@@ -2,7 +2,6 @@
 #define NETWORKMANAGERHPP
 
 #include <Models.hpp>
-#include <httplib.h>
 #include <QString>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -10,6 +9,9 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QEventLoop>
 
 namespace PerfMgmt {
 class NetworkManager {
@@ -31,15 +33,15 @@ bool updateReview(int serverReviewId, const PerformanceReview& review);
 ~NetworkManager() = default;
 
 private:
-std::string baseUrl;
-httplib::Client httpClient;
+QString baseUrl;
+QNetworkAccessManager networkManager;
 
 std::optional<Employee> parseEmployeeJson(const QJsonObject& jEmp);
 std::optional<PerformanceReview> parsePerformanceReview(const QJsonObject& jPerf);
 
-std::optional<httplib::Result> makeGetRequest(const std::string& path);
-std::optional<httplib::Result> makePostRequest(const std::string& path, const std::string& body,
-                                               const std::string& conentType);
+std::optional<QByteArray> makeGetRequest(const QString& path);
+std::optional<QByteArray> makePostRequest(const QString& path, const QByteArray& body,
+                                          const QString& contentType);
 };
 } // namespace PerfMgmt
 
